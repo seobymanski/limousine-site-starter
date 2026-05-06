@@ -1,0 +1,60 @@
+---
+/**
+ * DriveTimesTable
+ *
+ * Renders the "Drive Times to Nearby Cities" block on airport pages.
+ * Phrases ranges in words (e.g. "under thirty minutes in normal traffic"),
+ * not numerals — that's an editorial rule from the airport-page brief.
+ */
+
+interface DriveTime {
+  destination: string;
+  range: string;
+  url?: string;
+  blurb?: string;
+}
+
+interface Props {
+  airportName: string;
+  driveTimes: DriveTime[];
+}
+
+const { airportName, driveTimes } = Astro.props;
+---
+
+{driveTimes.length > 0 && (
+  <section class="bg-white py-20 lg:py-28">
+    <div class="mx-auto max-w-[1400px] px-6 lg:px-12">
+      <div class="mb-12 lg:mb-16 max-w-3xl">
+        <p class="eyebrow mb-4">Drive Times</p>
+        <h2 class="section-heading font-display text-3xl leading-[1.1] tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
+          From {airportName} to where you are going.
+        </h2>
+      </div>
+
+      <div class="border-t border-neutral-900/10">
+        {driveTimes.map((d) => (
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8 py-6 border-b border-neutral-900/10 items-baseline">
+            <div class="md:col-span-4">
+              <h3 class="font-display text-lg tracking-tight text-neutral-900 sm:text-xl">
+                {d.url ? (
+                  <a href={d.url} target="_blank" rel="noopener noreferrer" class="link-underline">
+                    {d.destination}
+                  </a>
+                ) : (
+                  d.destination
+                )}
+              </h3>
+            </div>
+            <div class="md:col-span-4 text-base text-neutral-700">{d.range}</div>
+            {d.blurb && (
+              <div class="md:col-span-4 text-sm text-neutral-500 leading-relaxed">
+                {d.blurb}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+)}

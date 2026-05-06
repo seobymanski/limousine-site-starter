@@ -1,0 +1,85 @@
+---
+interface Props {
+  heading?: string;
+  subtext?: string;
+  class?: string;
+}
+
+const {
+  heading = 'Stay in the Loop',
+  subtext = 'Get the latest news on preservation efforts, upcoming events, and mid-century modern architecture in Central Texas.',
+  class: className = '',
+} = Astro.props;
+---
+
+<div class:list={['newsletter-signup', className]}>
+  <h3 class="font-display font-bold text-2xl text-neutral-900 mb-3">{heading}</h3>
+  <p class="text-neutral-500 mb-6 leading-relaxed">{subtext}</p>
+
+  <form class="flex flex-col sm:flex-row gap-3" id="newsletter-form">
+    <div class="form-field flex-1">
+      <input
+        type="email"
+        name="email"
+        placeholder=" "
+        required
+        class="w-full border-b-2 border-neutral-200 bg-neutral-50 rounded-t-lg px-4 pt-7 pb-2 text-neutral-900 focus:border-primary-500 focus:outline-none transition-all duration-300 focus:shadow-[0_0_0_3px_rgba(var(--color-primary-rgb),0.1)]"
+      />
+      <label>Email Address</label>
+    </div>
+    <button type="submit" class="btn-primary whitespace-nowrap !py-3 sm:self-end">
+      Subscribe
+    </button>
+  </form>
+
+  <div id="newsletter-success" class="hidden mt-4 text-sm text-green-600 font-medium">
+    Thank you for subscribing! Check your inbox to confirm.
+  </div>
+</div>
+
+<script>
+  const CMS_URL = 'https://cms.midtexmod.org';
+
+  function initNewsletter() {
+    const form = document.getElementById('newsletter-form') as HTMLFormElement | null;
+    const success = document.getElementById('newsletter-success');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const input = form.querySelector('input[name="email"]') as HTMLInputElement | null;
+      const button = form.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+      const email = input?.value?.trim();
+      if (!email) return;
+
+      // Source = the page path so we can see where signups come from.
+      const source = `website-${(window.location.pathname || '/').replace(/\//g, '-').replace(/^-|-$/g, '') || 'home'}`;
+
+      if (button) { button.disabled = true; button.textContent = 'Subscribing…'; }
+      try {
+        const res = await fetch(`${CMS_URL}/api/subscribe-newsletter`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ email, source }),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || 'Subscription failed');
+        }
+        form.classList.add('hidden');
+        success?.classList.remove('hidden');
+      } catch (err: any) {
+        if (button) { button.disabled = false; button.textContent = 'Subscribe'; }
+        if (success) {
+          success.classList.remove('hidden');
+          success.classList.remove('text-green-600');
+          success.classList.add('text-red-600');
+          success.textContent = err?.message || 'Sorry, something went wrong. Please try again.';
+        }
+      }
+    });
+  }
+
+  initNewsletter();
+  document.addEventListener('astro:after-swap', initNewsletter);
+</script>

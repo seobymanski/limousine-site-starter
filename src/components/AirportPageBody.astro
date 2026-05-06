@@ -1,0 +1,310 @@
+---
+/**
+ * AirportPageBody
+ *
+ * Renders a CMS-managed Airport Page (Payload BlogPosts where category =
+ * 'airport-page') as a sequence of typed sections — not a single HTML body.
+ * Each section is rendered by its own component or block in the order defined
+ * by `context/airport-page-brief.md`.
+ *
+ * If `post.airportSections` is undefined (legacy or unmigrated post), falls
+ * back to the prose `post.body` so old content keeps rendering.
+ */
+import type { BlogPost } from '../data/blog';
+import type { Airport } from '../data/airports';
+import { siteConfig } from '../data/site-config';
+import Hero from './Hero.astro';
+import Breadcrumb from './Breadcrumb.astro';
+import CTA from './CTA.astro';
+import SectionDivider from './SectionDivider.astro';
+import TopServicesBlock from './TopServicesBlock.astro';
+import FBOList from './FBOList.astro';
+import AirportQuickFactsPanel from './AirportQuickFactsPanel.astro';
+import DriveTimesTable from './DriveTimesTable.astro';
+import FAQ from './FAQ.astro';
+
+interface Props {
+  post: BlogPost;
+  airport: Airport;
+}
+
+const { post, airport } = Astro.props;
+
+const sections = post.airportSections;
+const hasSections = Boolean(sections);
+const fallbackBody = !hasSections && post.body ? post.body : '';
+---
+
+<Hero
+  variant="dark"
+  eyebrow={`${airport.icao}${airport.iata ? ` · ${airport.iata}` : ''} · Ground Transportation`}
+  heading={post.title}
+  subheading={post.excerpt}
+  ctaPrimary={{ label: 'Reserve a Transfer', href: '/contact/' }}
+  ctaSecondary={{ label: `Call ${siteConfig.phone}`, href: siteConfig.phoneHref }}
+  image={post.bannerImage || post.featuredImage}
+  imageAlt={post.bannerImageAlt || post.featuredImageAlt || `${airport.name} private jet ground transportation`}
+/>
+
+<Breadcrumb
+  items={[
+    { label: 'Home', href: '/' },
+    { label: 'FBOs', href: '/airports/' },
+    { label: airport.icao, href: `/airports/${airport.slug}/` },
+  ]}
+/>
+
+{/* Always-on header strip (data lives in src/data/airports.ts) */}
+<section class="border-y border-neutral-900/10 bg-[var(--color-ivory)] py-10">
+  <div class="mx-auto max-w-[1400px] px-6 lg:px-12">
+    <div class="grid grid-cols-2 gap-y-6 lg:grid-cols-4">
+      <div>
+        <p class="text-xs uppercase tracking-[0.14em] text-neutral-500">ICAO</p>
+        <p class="mt-1 font-display text-2xl tracking-tight">{airport.icao}</p>
+      </div>
+      {airport.iata && (
+        <div>
+          <p class="text-xs uppercase tracking-[0.14em] text-neutral-500">IATA</p>
+          <p class="mt-1 font-display text-2xl tracking-tight">{airport.iata}</p>
+        </div>
+      )}
+      <div>
+        <p class="text-xs uppercase tracking-[0.14em] text-neutral-500">Region</p>
+        <p class="mt-1 font-display text-2xl tracking-tight">{airport.region}</p>
+      </div>
+      <div>
+        <p class="text-xs uppercase tracking-[0.14em] text-neutral-500">FBOs on file</p>
+        <p class="mt-1 font-display text-2xl tracking-tight">{airport.fbos.length}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{hasSections ? (
+  <>
+    {/* 4. Opening */}
+    {sections!.opening && (
+      <section class="bg-white py-20 lg:py-28">
+        <div class="mx-auto max-w-3xl px-6 lg:px-12">
+          <div class="prose-luxury text-lg leading-relaxed text-neutral-800" set:html={sections!.opening}></div>
+        </div>
+      </section>
+    )}
+
+    {/* 5. Benefits */}
+    {(sections!.benefitsHeading || sections!.benefitsBody) && (
+      <>
+        <SectionDivider variant="hairline" />
+        <section class="bg-[var(--color-ivory)] py-20 lg:py-28">
+          <div class="mx-auto max-w-[1400px] px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-12 gap-12">
+            {sections!.benefitsHeading && (
+              <div class="lg:col-span-5">
+                <p class="eyebrow mb-4">Benefits</p>
+                <h2 class="section-heading font-display text-3xl leading-[1.1] tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
+                  {sections!.benefitsHeading}
+                </h2>
+              </div>
+            )}
+            {sections!.benefitsBody && (
+              <div class="lg:col-span-7">
+                <div class="prose-luxury text-neutral-700 leading-relaxed" set:html={sections!.benefitsBody}></div>
+              </div>
+            )}
+          </div>
+        </section>
+      </>
+    )}
+
+    {/* 6. About at this airport */}
+    {sections!.about && (
+      <>
+        <SectionDivider variant="hairline" />
+        <section class="bg-white py-20 lg:py-28">
+          <div class="mx-auto max-w-[1400px] px-6 lg:px-12">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+              <div>
+                <h2 class="font-display text-3xl leading-[1.1] tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl pb-6 border-b border-[var(--color-accent-500)]">
+                  About {siteConfig.name}
+                </h2>
+                <div class="prose-luxury text-neutral-700 leading-relaxed mt-8" set:html={sections!.about}></div>
+              </div>
+              <div class="aspect-[4/3] bg-black flex items-center justify-center p-16 lg:p-20">
+                <img
+                  src="/brand/logo.svg"
+                  alt={siteConfig.name}
+                  class="max-w-full max-h-full object-contain"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+      </>
+    )}
+
+    {/* 7-8. Mid-page CTA + What We Offer — full-bleed dark split */}
+    {(sections!.ctaHeading || sections!.whatWeOffer) && (
+      <>
+        <SectionDivider variant="hairline" />
+        <section class="bg-black">
+          <div class="grid grid-cols-1 lg:grid-cols-2">
+            <div class="p-10 lg:p-20 flex flex-col justify-center">
+              {sections!.ctaHeading && (
+                <h2 class="font-display text-3xl text-white leading-[1.1] tracking-tight sm:text-4xl lg:text-5xl max-w-[16ch]">
+                  {sections!.ctaHeading}
+                </h2>
+              )}
+              {sections!.whatWeOffer && (
+                <div class="prose-luxury text-neutral-300 leading-relaxed mt-6 max-w-prose [&_a]:text-[var(--color-accent-400)]" set:html={sections!.whatWeOffer}></div>
+              )}
+              <div class="flex flex-wrap gap-3 mt-10">
+                <a
+                  href="/contact/"
+                  class="inline-flex items-center px-6 py-3 bg-white text-black text-xs uppercase tracking-[0.14em] font-medium hover:bg-neutral-200 transition-colors"
+                >
+                  Reserve a Transfer
+                </a>
+                <a
+                  href={siteConfig.phoneHref}
+                  class="inline-flex items-center px-6 py-3 text-white text-xs uppercase tracking-[0.14em] font-medium border border-white/30 hover:border-white/60 transition-colors"
+                >
+                  Call {siteConfig.phone}
+                </a>
+              </div>
+            </div>
+            <div
+              class="relative min-h-[300px] lg:min-h-[480px] bg-cover bg-center"
+              style="background-image: url('/textures/cta-wave.svg');"
+              aria-hidden="true"
+            ></div>
+          </div>
+        </section>
+      </>
+    )}
+
+    {/* 9. Top 3 Services */}
+    {sections!.topServices && sections!.topServices.length > 0 && (
+      <TopServicesBlock
+        eyebrow="Services"
+        heading={`Top services at ${airport.icao}.`}
+        services={sections!.topServices}
+      />
+    )}
+
+    {/* Gallery — supplementary in-content imagery */}
+    {post.galleryImages && post.galleryImages.length > 0 && (
+      <section class="bg-[var(--color-ivory)] py-0">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-px bg-neutral-900/10">
+          {post.galleryImages.slice(0, 2).map((img) => (
+            <figure class="relative aspect-[4/3] bg-black overflow-hidden">
+              <img
+                src={img.url}
+                alt={img.alt || `${airport.name} ground transportation`}
+                class="absolute inset-0 h-full w-full object-cover"
+                loading="lazy"
+              />
+              {img.caption && (
+                <figcaption class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent text-white text-sm">
+                  {img.caption}
+                </figcaption>
+              )}
+            </figure>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {/* 10. Why Choose Us */}
+    {sections!.whyChooseUs && (
+      <>
+        <SectionDivider variant="hairline" />
+        <section class="bg-[var(--color-ivory)] py-20 lg:py-28">
+          <div class="mx-auto max-w-[1400px] px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-12 gap-12">
+            <div class="lg:col-span-5">
+              <p class="eyebrow mb-4">Why Choose Us</p>
+              <h2 class="section-heading font-display text-3xl leading-[1.1] tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
+                Why operators choose {siteConfig.name} for {airport.icao} transfers.
+              </h2>
+            </div>
+            <div class="lg:col-span-7">
+              <div class="prose-luxury text-neutral-700 leading-relaxed" set:html={sections!.whyChooseUs}></div>
+            </div>
+          </div>
+        </section>
+      </>
+    )}
+
+    {/* 11a. FBO Operators on Field — most important block */}
+    {sections!.fboOperators && sections!.fboOperators.length > 0 && (
+      <FBOList airportName={airport.name} operators={sections!.fboOperators} />
+    )}
+
+    {/* 11b. Airport Quick Facts */}
+    {sections!.airportQuickFacts && (
+      <AirportQuickFactsPanel
+        airportName={airport.name}
+        airportIcao={airport.icao}
+        airportIata={airport.iata}
+        facts={sections!.airportQuickFacts}
+      />
+    )}
+
+    {/* 11c. Drive Times */}
+    {sections!.driveTimes && sections!.driveTimes.length > 0 && (
+      <DriveTimesTable airportName={airport.name} driveTimes={sections!.driveTimes} />
+    )}
+
+    {/* 11d. Local Considerations */}
+    {sections!.localConsiderations && (
+      <>
+        <SectionDivider variant="hairline" />
+        <section class="bg-[var(--color-ivory)] py-20 lg:py-28">
+          <div class="mx-auto max-w-[1400px] px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-12 gap-12">
+            <div class="lg:col-span-5">
+              <p class="eyebrow mb-4">Local Considerations</p>
+              <h2 class="section-heading font-display text-3xl leading-[1.1] tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
+                What to plan for at {airport.icao}.
+              </h2>
+            </div>
+            <div class="lg:col-span-7">
+              <div class="prose-luxury text-neutral-700 leading-relaxed" set:html={sections!.localConsiderations}></div>
+            </div>
+          </div>
+        </section>
+      </>
+    )}
+
+    {/* 13. FAQs */}
+    {sections!.faqs && sections!.faqs.length > 0 && (
+      <>
+        <SectionDivider variant="hairline" />
+        <FAQ
+          eyebrow="Frequently Asked"
+          heading={`Questions about ground transportation at ${airport.name}.`}
+          faqs={sections!.faqs}
+        />
+      </>
+    )}
+  </>
+) : (
+  /* Legacy fallback: prose body */
+  <article class="bg-[var(--color-ivory)] py-20 lg:py-28">
+    <div class="mx-auto max-w-3xl px-6 lg:px-12">
+      <div class="prose-luxury airport-body" set:html={fallbackBody}></div>
+    </div>
+  </article>
+)}
+
+<SectionDivider variant="hairline" />
+
+<CTA
+  variant="dark"
+  eyebrow="Ramp Coordination"
+  heading={sections?.closingCtaHeading || `Schedule your next ${airport.icao} transfer.`}
+  headingItalic="Step off the jet, the car is already there."
+  description={`Twenty-four-hour live dispatch with FBO coordination at ${airport.name}. Tail tracking, named chauffeurs, ramp pickup.`}
+/>
+
+<style>
+  .airport-body :global(> h1:first-child) { display: none; }
+</style>

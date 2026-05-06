@@ -1,0 +1,73 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/Hero.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import ServiceCard from '../../components/ServiceCard.astro';
+import CTA from '../../components/CTA.astro';
+import SectionDivider from '../../components/SectionDivider.astro';
+import LocalBusinessSchema from '../../components/schemas/LocalBusinessSchema.astro';
+import BreadcrumbSchema from '../../components/schemas/BreadcrumbSchema.astro';
+import MarkdownBody from '../../components/MarkdownBody.astro';
+import { siteConfig } from '../../data/site-config';
+import { loadPageContent } from '../../lib/content';
+
+const content = loadPageContent('services');
+const fm = content?.frontmatter;
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Services', href: '/services/' },
+];
+
+const services = siteConfig.services.map((s, i) => ({
+  ...s,
+  index: String(i + 1).padStart(2, '0'),
+}));
+---
+
+<BaseLayout
+  title={fm?.title || 'Private Aviation Services · [BRAND]'}
+  description={fm?.description || 'Four service lines covering every type of private jet ground transportation: FBO transfers, luxury chauffeur, charter buses, and discreet VIP service. CAA partner since 1996.'}
+  ogImage={fm?.ogImage}
+>
+  <LocalBusinessSchema slot="head" />
+  <BreadcrumbSchema slot="head" items={breadcrumbs} />
+
+  <Hero
+    variant="page"
+    eyebrow="Services"
+    heading={fm?.h1 || 'Our Services'}
+    headingItalic="Four lines, one dispatch desk."
+    subheading={fm?.heroSubhead || 'From a single sedan at the FBO ramp to a fifty-six-passenger motor coach for a film crew, every [BRAND] service runs through the same twenty-four-hour reservations team.'}
+  />
+
+  <Breadcrumb items={breadcrumbs} />
+
+  {content && <MarkdownBody html={content.bodyHtml} />}
+
+  <SectionDivider variant="hairline" />
+
+  <section class="bg-[var(--color-ivory)] py-20 lg:py-28">
+    <div class="mx-auto max-w-[1400px] px-6 lg:px-12">
+      <div class="grid grid-cols-1 gap-px lg:grid-cols-2 bg-neutral-900/10">
+        {services.map((s) => (
+          <ServiceCard
+            title={s.name}
+            description={s.shortDescription}
+            href={`/services/${s.slug}/`}
+            index={s.index}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <SectionDivider variant="hairline" />
+
+  <CTA
+    variant="dark"
+    eyebrow="Reservations · 24/7"
+    heading="Not sure which service fits your trip?"
+    description="Reservations matches the right vehicle and chauffeur to your manifest, FBO, and schedule. Speak with the team."
+  />
+</BaseLayout>

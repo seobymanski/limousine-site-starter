@@ -1,0 +1,330 @@
+---
+/**
+ * LocationPageBody
+ *
+ * Renders a CMS-managed Location Page (Payload BlogPosts where category =
+ * 'location-page') as a sequence of typed sections — not a single HTML body.
+ * Each section is rendered by its own component or block in the order
+ * defined by `context/location-page-brief.md`.
+ *
+ * If `post.locationSections` is undefined (legacy or unmigrated post), falls
+ * back to the prose `post.body` so old content keeps rendering.
+ */
+import type { BlogPost } from '../data/blog';
+import { siteConfig } from '../data/site-config';
+import { airportsByCity } from '../data/airports';
+import Hero from './Hero.astro';
+import Breadcrumb from './Breadcrumb.astro';
+import CTA from './CTA.astro';
+import SectionDivider from './SectionDivider.astro';
+import AirportCard from './AirportCard.astro';
+import TopServicesBlock from './TopServicesBlock.astro';
+import FAQ from './FAQ.astro';
+
+interface Props {
+  post: BlogPost;
+  /** City slug, e.g. "aspen" */
+  citySlug: string;
+}
+
+const { post, citySlug } = Astro.props;
+
+const cityRecord = siteConfig.cities.find((c) => c.slug === citySlug);
+const cityName = cityRecord?.city || post.title;
+const cityState = cityRecord?.state || '';
+const cityAirports = airportsByCity(citySlug);
+
+const sections = post.locationSections;
+const hasSections = Boolean(sections);
+const fallbackBody = !hasSections && post.body ? post.body : '';
+---
+
+<Hero
+  variant="dark"
+  eyebrow={`${cityState ? `${cityState} · ` : ''}Private Jet Transfer`}
+  heading={post.title}
+  subheading={post.excerpt}
+  ctaPrimary={{ label: 'Reserve a Transfer', href: '/contact/' }}
+  ctaSecondary={{ label: `Call ${siteConfig.phone}`, href: siteConfig.phoneHref }}
+  image={post.bannerImage || post.featuredImage}
+  imageAlt={post.bannerImageAlt || post.featuredImageAlt || `${cityName} private jet ground transportation`}
+/>
+
+<Breadcrumb
+  items={[
+    { label: 'Home', href: '/' },
+    { label: 'Cities', href: '/private-jet-transfer/' },
+    { label: cityName, href: `/private-jet-transfer/${citySlug}/` },
+  ]}
+/>
+
+{hasSections ? (
+  <>
+    {/* 4. Opening */}
+    {sections!.opening && (
+      <section class="bg-[var(--color-ivory)] py-20 lg:py-28">
+        <div class="mx-auto max-w-3xl px-6 lg:px-12">
+          <div class="prose-luxury text-lg leading-relaxed text-neutral-800" set:html={sections!.opening}></div>
+        </div>
+      </section>
+    )}
+
+    {/* 5. Benefits */}
+    {(sections!.benefitsHeading || sections!.benefitsBody) && (
+      <>
+        <SectionDivider variant="hairline" />
+        <section class="bg-white py-20 lg:py-28">
+          <div class="mx-auto max-w-[1400px] px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-12 gap-12">
+            {sections!.benefitsHeading && (
+              <div class="lg:col-span-5">
+                <p class="eyebrow mb-4">Benefits</p>
+                <h2 class="section-heading font-display text-3xl leading-[1.1] tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
+                  {sections!.benefitsHeading}
+                </h2>
+              </div>
+            )}
+            {sections!.benefitsBody && (
+              <div class="lg:col-span-7">
+                <div class="prose-luxury text-neutral-700 leading-relaxed" set:html={sections!.benefitsBody}></div>
+              </div>
+            )}
+          </div>
+        </section>
+      </>
+    )}
+
+    {/* 6. About */}
+    {sections!.about && (
+      <>
+        <SectionDivider variant="hairline" />
+        <section class="bg-white py-20 lg:py-28">
+          <div class="mx-auto max-w-[1400px] px-6 lg:px-12">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+              <div>
+                <h2 class="font-display text-3xl leading-[1.1] tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl pb-6 border-b border-[var(--color-accent-500)]">
+                  About {siteConfig.name}
+                </h2>
+                <div class="prose-luxury text-neutral-700 leading-relaxed mt-8" set:html={sections!.about}></div>
+              </div>
+              <div class="aspect-[4/3] bg-black flex items-center justify-center p-16 lg:p-20">
+                <img
+                  src="/brand/logo.svg"
+                  alt={siteConfig.name}
+                  class="max-w-full max-h-full object-contain"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+      </>
+    )}
+
+    {/* 7-8. Mid-page CTA + What We Offer — full-bleed dark split */}
+    {(sections!.ctaHeading || sections!.whatWeOffer) && (
+      <>
+        <SectionDivider variant="hairline" />
+        <section class="bg-black">
+          <div class="grid grid-cols-1 lg:grid-cols-2">
+            <div class="p-10 lg:p-20 flex flex-col justify-center">
+              {sections!.ctaHeading && (
+                <h2 class="font-display text-3xl text-white leading-[1.1] tracking-tight sm:text-4xl lg:text-5xl max-w-[16ch]">
+                  {sections!.ctaHeading}
+                </h2>
+              )}
+              {sections!.whatWeOffer && (
+                <div class="prose-luxury text-neutral-300 leading-relaxed mt-6 max-w-prose [&_a]:text-[var(--color-accent-400)]" set:html={sections!.whatWeOffer}></div>
+              )}
+              <div class="flex flex-wrap gap-3 mt-10">
+                <a
+                  href="/contact/"
+                  class="inline-flex items-center px-6 py-3 bg-white text-black text-xs uppercase tracking-[0.14em] font-medium hover:bg-neutral-200 transition-colors"
+                >
+                  Reserve a Transfer
+                </a>
+                <a
+                  href={siteConfig.phoneHref}
+                  class="inline-flex items-center px-6 py-3 text-white text-xs uppercase tracking-[0.14em] font-medium border border-white/30 hover:border-white/60 transition-colors"
+                >
+                  Call {siteConfig.phone}
+                </a>
+              </div>
+            </div>
+            <div
+              class="relative min-h-[300px] lg:min-h-[480px] bg-cover bg-center"
+              style="background-image: url('/textures/cta-wave.svg');"
+              aria-hidden="true"
+            ></div>
+          </div>
+        </section>
+      </>
+    )}
+
+    {/* 9. Top 3 Services */}
+    {sections!.topServices && sections!.topServices.length > 0 && (
+      <TopServicesBlock
+        eyebrow="Services"
+        heading={`Top services in ${cityName}.`}
+        services={sections!.topServices}
+      />
+    )}
+
+    {/* Gallery — supplementary in-content imagery */}
+    {post.galleryImages && post.galleryImages.length > 0 && (
+      <section class="bg-[var(--color-ivory)] py-0">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-px bg-neutral-900/10">
+          {post.galleryImages.slice(0, 2).map((img) => (
+            <figure class="relative aspect-[4/3] bg-black overflow-hidden">
+              <img
+                src={img.url}
+                alt={img.alt || `${cityName} private jet ground transportation`}
+                class="absolute inset-0 h-full w-full object-cover"
+                loading="lazy"
+              />
+              {img.caption && (
+                <figcaption class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent text-white text-sm">
+                  {img.caption}
+                </figcaption>
+              )}
+            </figure>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {/* 10. Why Choose Us */}
+    {sections!.whyChooseUs && (
+      <>
+        <SectionDivider variant="hairline" />
+        <section class="bg-[var(--color-ivory)] py-20 lg:py-28">
+          <div class="mx-auto max-w-[1400px] px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-12 gap-12">
+            <div class="lg:col-span-5">
+              <p class="eyebrow mb-4">Why Choose Us</p>
+              <h2 class="section-heading font-display text-3xl leading-[1.1] tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
+                Why operators choose {siteConfig.name}.
+              </h2>
+            </div>
+            <div class="lg:col-span-7">
+              <div class="prose-luxury text-neutral-700 leading-relaxed" set:html={sections!.whyChooseUs}></div>
+            </div>
+          </div>
+        </section>
+      </>
+    )}
+
+    {/* 11-15. Everything You Need to Know About [City]: Pricing / Events / Neighborhoods / Venues */}
+    {(sections!.pricing || sections!.events || sections!.neighborhoods || sections!.venues) && (
+      <>
+        <SectionDivider variant="hairline" />
+        <section class="bg-white py-20 lg:py-28">
+          <div class="mx-auto max-w-[1400px] px-6 lg:px-12">
+            <div class="mb-12 lg:mb-16 max-w-3xl">
+              <p class="eyebrow mb-4">{cityName} guide</p>
+              <h2 class="section-heading font-display text-3xl leading-[1.1] tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
+                Everything you need to know about {cityName}.
+              </h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-16 gap-y-16">
+              {sections!.pricing && (
+                <article>
+                  <h3 class="font-display text-xl tracking-tight text-neutral-900 sm:text-2xl mb-4 leading-[1.15]">
+                    Pricing guide
+                  </h3>
+                  <div class="prose-luxury prose-sm text-neutral-700 leading-relaxed" set:html={sections!.pricing}></div>
+                </article>
+              )}
+              {sections!.events && (
+                <article>
+                  <h3 class="font-display text-xl tracking-tight text-neutral-900 sm:text-2xl mb-4 leading-[1.15]">
+                    Events
+                  </h3>
+                  <div class="prose-luxury prose-sm text-neutral-700 leading-relaxed" set:html={sections!.events}></div>
+                </article>
+              )}
+              {sections!.neighborhoods && (
+                <article>
+                  <h3 class="font-display text-xl tracking-tight text-neutral-900 sm:text-2xl mb-4 leading-[1.15]">
+                    Neighborhoods
+                  </h3>
+                  <div class="prose-luxury prose-sm text-neutral-700 leading-relaxed" set:html={sections!.neighborhoods}></div>
+                </article>
+              )}
+              {sections!.venues && (
+                <article>
+                  <h3 class="font-display text-xl tracking-tight text-neutral-900 sm:text-2xl mb-4 leading-[1.15]">
+                    Popular venues
+                  </h3>
+                  <div class="prose-luxury prose-sm text-neutral-700 leading-relaxed" set:html={sections!.venues}></div>
+                </article>
+              )}
+            </div>
+          </div>
+        </section>
+      </>
+    )}
+
+    {/* Airports near this city — pulled from src/data/airports.ts */}
+    {cityAirports.length > 0 && (
+      <>
+        <SectionDivider variant="hairline" />
+        <section class="bg-[var(--color-ivory)] py-20 lg:py-28">
+          <div class="mx-auto max-w-[1400px] px-6 lg:px-12">
+            <div class="mb-10 flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-end">
+              <div>
+                <p class="eyebrow mb-4">Airports near {cityName}</p>
+                <h2 class="font-display text-3xl tracking-tight text-neutral-900 sm:text-4xl">
+                  Direct ramp pickup at every field.
+                </h2>
+              </div>
+              <a href="/airports/" class="link-underline tracked-nav">All FBOs</a>
+            </div>
+            <div class="grid grid-cols-2 gap-px sm:grid-cols-3 md:grid-cols-4 bg-neutral-900/10">
+              {cityAirports.map((a) => (
+                <AirportCard
+                  icao={a.icao}
+                  name={a.name}
+                  city={a.city}
+                  href={`/airports/${a.slug}/`}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      </>
+    )}
+
+    {/* 17. FAQs */}
+    {sections!.faqs && sections!.faqs.length > 0 && (
+      <>
+        <SectionDivider variant="hairline" />
+        <FAQ
+          eyebrow="Frequently Asked"
+          heading={`Questions about private jet transfers in ${cityName}.`}
+          faqs={sections!.faqs}
+        />
+      </>
+    )}
+  </>
+) : (
+  /* Legacy fallback: prose body */
+  <article class="bg-[var(--color-ivory)] py-20 lg:py-28">
+    <div class="mx-auto max-w-3xl px-6 lg:px-12">
+      <div class="prose-luxury location-body" set:html={fallbackBody}></div>
+    </div>
+  </article>
+)}
+
+<SectionDivider variant="hairline" />
+
+<CTA
+  variant="dark"
+  eyebrow="Reservations"
+  heading={sections?.closingCtaHeading || `Book a ${cityName} transfer.`}
+  headingItalic="Wheels up. Cars on the ramp."
+  description={`Twenty-four-hour live dispatch in ${cityName}. Tail tracking, FBO coordination, named full-time chauffeurs. Speak with reservations.`}
+/>
+
+<style>
+  .location-body :global(> h1:first-child) { display: none; }
+</style>

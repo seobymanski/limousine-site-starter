@@ -1,0 +1,59 @@
+---
+/**
+ * YouFlyWeDrive — brand-defining homepage CTA banner.
+ * "YOU FLY. WE'LL DRIVE." set in large display serif on a black field.
+ * Reproduces the live-site moment that anchors the company's positioning.
+ */
+import { siteConfig } from '../data/site-config';
+---
+
+<section class="relative bg-neutral-950 py-32 lg:py-40 overflow-hidden">
+  <!-- Decorative serif backdrop letters -->
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute -left-[4%] top-1/2 hidden -translate-y-1/2 select-none font-display text-[20rem] leading-none italic text-white/[0.025] lg:block"
+  >
+    II
+  </div>
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute -right-[6%] bottom-0 hidden select-none font-display text-[18rem] leading-none italic text-white/[0.025] lg:block"
+  >
+    Worldwide
+  </div>
+
+  <div class="relative mx-auto max-w-[1400px] px-6 lg:px-12">
+    <div class="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-center lg:gap-16">
+      <div class="lg:col-span-7">
+        <p class="text-xs uppercase tracking-[0.16em] text-[var(--color-bronze,#c9a96e)]">
+          The Brand Promise
+        </p>
+        <h2 class="section-heading mt-6 font-display text-5xl leading-[0.95] tracking-tight text-[var(--color-ivory)] sm:text-6xl lg:text-8xl">
+          You fly.<br /><em class="font-normal italic">We'll drive.</em>
+        </h2>
+        <p class="mt-8 max-w-xl text-base leading-relaxed text-white/70 lg:text-lg">
+          From wheels-up to wheels-down to your front door, the only thing you handle is the flight. Reservations are open every hour of every day.
+        </p>
+      </div>
+
+      <div class="flex flex-col items-start gap-4 lg:col-span-5 lg:col-start-8 lg:items-end lg:text-right">
+        <a
+          href="/contact/"
+          class="inline-flex items-center gap-3 border border-[var(--color-ivory)] bg-[var(--color-ivory)] px-8 py-4 font-display text-sm uppercase tracking-[0.14em] text-neutral-900 transition-all hover:bg-transparent hover:text-[var(--color-ivory)]"
+        >
+          Make a Reservation
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M1 7H13M13 7L7 1M13 7L7 13" stroke="currentColor" stroke-width="1.2" />
+          </svg>
+        </a>
+        <a
+          href={siteConfig.phoneHref}
+          class="inline-flex items-center gap-3 border border-white/20 px-8 py-4 font-display text-sm uppercase tracking-[0.14em] text-[var(--color-ivory)] transition-all hover:border-[var(--color-ivory)] hover:bg-[var(--color-ivory)]/5"
+        >
+          Call {siteConfig.phone}
+          <span class="text-[0.6rem] tracking-[0.16em] text-white/50">PRESS 1</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

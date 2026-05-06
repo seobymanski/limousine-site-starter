@@ -1,0 +1,105 @@
+---
+import '../styles/global.css';
+import { ClientRouter } from 'astro:transitions';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import GrainOverlay from '../components/GrainOverlay.astro';
+import PageTransition from '../components/PageTransition.astro';
+import SectionHeadingReveal from '../components/SectionHeadingReveal.astro';
+import { siteConfig } from '../data/site-config';
+
+interface Props {
+  title: string;
+  description: string;
+  ogImage?: string;
+  noIndex?: boolean;
+  /** Optional override for canonical URL (use when a route is paginated, etc.) */
+  canonical?: string;
+  /** Hides the global header (e.g. for special landing pages) */
+  hideHeader?: boolean;
+  /** Hides the global footer */
+  hideFooter?: boolean;
+  /** Set to true on the homepage so the header sits transparent over a dark hero */
+  transparentHeader?: boolean;
+}
+
+const {
+  title,
+  description,
+  ogImage = '/og-default.svg',
+  noIndex = false,
+  canonical,
+  hideHeader = false,
+  hideFooter = false,
+  transparentHeader = false,
+} = Astro.props;
+
+const SITE_URL = siteConfig.url;
+const SITE_NAME = siteConfig.fullName;
+
+const canonicalURL = canonical ?? new URL(Astro.url.pathname, SITE_URL).href;
+---
+
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#fafaf6" />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+    {noIndex && <meta name="robots" content="noindex, nofollow" />}
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL(ogImage, SITE_URL).href} />
+    <meta property="og:site_name" content={SITE_NAME} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL(ogImage, SITE_URL).href} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap"
+    />
+
+    <ClientRouter />
+    <slot name="head" />
+  </head>
+  <body class="bg-[var(--color-ivory)] text-neutral-900 antialiased">
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:bg-black focus:text-[var(--color-ivory)] focus:px-4 focus:py-2"
+      >Skip to content</a
+    >
+
+    <GrainOverlay />
+    <PageTransition />
+
+    {!hideHeader && <Header transparent={transparentHeader} />}
+
+    <main id="main-content">
+      <slot />
+    </main>
+
+    {!hideFooter && <Footer />}
+
+    <SectionHeadingReveal />
+
+    <script is:inline>
+      // Strip the no-js class so the split-word reveal hides text correctly.
+      document.documentElement.classList.remove('no-js');
+    </script>
+  </body>
+</html>

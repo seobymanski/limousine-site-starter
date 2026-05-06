@@ -1,0 +1,55 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import LocationPageBody from '../../components/LocationPageBody.astro';
+import LocalBusinessSchema from '../../components/schemas/LocalBusinessSchema.astro';
+import BreadcrumbSchema from '../../components/schemas/BreadcrumbSchema.astro';
+import ServiceSchema from '../../components/schemas/ServiceSchema.astro';
+import {
+  fetchBlogPostBySlugAndCategory,
+  fetchBlogPostBySlugAndCategoryAnyStatus,
+} from '../../lib/payload';
+import { siteConfig } from '../../data/site-config';
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+const isPreview = Astro.url.searchParams.get('preview') === '1';
+
+if (!slug) {
+  return Astro.redirect('/private-jet-transfer/');
+}
+
+const post = isPreview
+  ? await fetchBlogPostBySlugAndCategoryAnyStatus(slug, 'location-page').catch(() => null)
+  : await fetchBlogPostBySlugAndCategory(slug, 'location-page').catch(() => null);
+
+if (!post) {
+  return new Response(null, { status: 404, statusText: 'Not Found' });
+}
+
+const cityRecord = siteConfig.cities.find((c) => c.slug === slug);
+const cityName = cityRecord?.city || post.title;
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Cities', href: '/private-jet-transfer/' },
+  { label: cityName, href: `/private-jet-transfer/${slug}/` },
+];
+
+const title = post.metaTitle || `${cityName} Private Jet Transfer · [BRAND]`;
+const description = post.metaDescription || post.excerpt;
+---
+
+<BaseLayout title={title} description={description} ogImage={post.bannerImage || post.featuredImage}>
+  <LocalBusinessSchema slot="head" city={cityRecord?.city} state={cityRecord?.state} />
+  <BreadcrumbSchema slot="head" items={breadcrumbs} />
+  <ServiceSchema slot="head" name={`Private Jet Transfer in ${cityName}`} description={description} />
+
+  {isPreview && (
+    <div class="sticky top-0 z-50 bg-[color:var(--color-primary-500)] text-white text-center text-xs uppercase tracking-[0.18em] font-semibold py-2 px-4">
+      Preview mode — Status: {post.status} · this post is not live to the public yet
+    </div>
+  )}
+
+  <LocationPageBody post={post} citySlug={slug} />
+</BaseLayout>

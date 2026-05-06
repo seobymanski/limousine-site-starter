@@ -1,0 +1,68 @@
+---
+import { airports } from '../data/airports';
+import AirportCard from './AirportCard.astro';
+
+interface Props {
+  eyebrow?: string;
+  heading?: string;
+  /** Optional subhead shown beneath the section heading */
+  description?: string;
+  /** Limit number of airports shown (defaults to all) */
+  limit?: number;
+  /** Hide the title block entirely (when used inside another section) */
+  bare?: boolean;
+}
+
+const {
+  eyebrow = 'FBO Network',
+  heading = 'Coverage at every major private aviation field.',
+  description,
+  limit,
+  bare = false,
+} = Astro.props;
+
+const items = limit ? airports.slice(0, limit) : airports;
+---
+
+<section class="bg-[var(--color-ivory)] py-24 lg:py-32">
+  <div class="mx-auto max-w-[1400px] px-6 lg:px-12">
+    {!bare && (
+      <div class="mb-14 lg:mb-20 max-w-3xl">
+        <p class="eyebrow mb-5">{eyebrow}</p>
+        <h2 class="section-heading font-display text-4xl leading-[1.08] tracking-tight text-neutral-900 sm:text-5xl lg:text-6xl">
+          {heading}
+        </h2>
+        {description && <p class="mt-5 text-lg text-neutral-600 max-w-2xl">{description}</p>}
+      </div>
+    )}
+
+    <div class="grid grid-cols-2 gap-px sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 bg-neutral-900/10">
+      {items.map((airport) => (
+        <AirportCard
+          icao={airport.icao}
+          name={airport.name}
+          city={airport.city}
+          href={`/airports/${airport.slug}/`}
+        />
+      ))}
+    </div>
+
+    {limit && airports.length > limit ? (
+      <div class="mt-10 flex justify-center">
+        <a
+          href="/airports/"
+          class="inline-flex items-center gap-3 px-7 py-3 bg-black text-[var(--color-ivory)] text-xs uppercase tracking-[0.14em] font-medium hover:bg-neutral-800 transition-colors"
+        >
+          <span>View All {airports.length} FBOs</span>
+          <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
+            <path d="M1 5H13M13 5L9 1M13 5L9 9" stroke="currentColor" stroke-width="1" />
+          </svg>
+        </a>
+      </div>
+    ) : (
+      <p class="mt-10 text-center text-xs uppercase tracking-[0.18em] text-neutral-500">
+        29 airports · 23 cities · 1,100+ destinations worldwide
+      </p>
+    )}
+  </div>
+</section>

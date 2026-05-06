@@ -1,0 +1,404 @@
+---
+/**
+ * Hero
+ *
+ * variant="homepage" — split asymmetric layout for the homepage.
+ *   Left (60%): eyebrow + serif H1 split-word reveal + sub + CTAs + trust strip.
+ *   Right (40%): cinematic image with bronze hairline frame.
+ *
+ * variant="page" — wider, shorter inner-page hero (used on services / about / fleet).
+ *
+ * variant="dark" — full-bleed cinematic with image background + ivory text overlay.
+ *   Used for city / airport / contact heroes.
+ */
+
+interface Props {
+  variant?: 'homepage' | 'page' | 'dark';
+  eyebrow?: string;
+  heading: string;
+  /** Optional emphasis word(s) appended to heading after a soft break — rendered in italic serif */
+  headingItalic?: string;
+  subheading?: string;
+  /** Primary CTA text + href */
+  ctaPrimary?: { label: string; href: string };
+  ctaSecondary?: { label: string; href: string };
+  image?: string;
+  imageAlt?: string;
+  /** Optional looping background video — replaces the right-column image on homepage variant */
+  video?: string;
+  /** Poster frame shown while video loads */
+  videoPoster?: string;
+  /** Trust signals shown as small inline strip (only used on homepage variant) */
+  trustSignals?: string[];
+  /** Override min-height (Tailwind class) */
+  minHeight?: string;
+}
+
+const {
+  variant = 'page',
+  eyebrow,
+  heading,
+  headingItalic,
+  subheading,
+  ctaPrimary,
+  ctaSecondary,
+  image,
+  imageAlt = '',
+  video,
+  videoPoster,
+  trustSignals,
+  minHeight,
+} = Astro.props;
+
+const defaultMinHeight =
+  variant === 'homepage' ? 'min-h-[62vh]' : variant === 'dark' ? 'min-h-[68vh]' : 'min-h-[52vh]';
+const minH = minHeight ?? defaultMinHeight;
+
+// Split heading into words for the reveal animation
+const words = heading.split(' ');
+---
+
+{variant === 'homepage' && (
+  <section class="relative bg-[var(--color-ivory)] flex flex-col lg:grid lg:grid-cols-12 min-h-[calc(100dvh-72px)] lg:min-h-[62vh]">
+    {/* Decorative serif backdrop letter */}
+    <div
+      aria-hidden="true"
+      class="pointer-events-none absolute -left-[6%] top-1/2 hidden -translate-y-1/2 select-none font-display text-[24rem] leading-none text-neutral-900/[0.025] lg:block"
+    >
+      U
+    </div>
+
+    {/* LEFT — text column (5/12) */}
+    <div class="relative z-10 lg:col-span-5 flex flex-col justify-start lg:justify-center px-6 pb-4 pt-6 lg:px-12 lg:pb-16 lg:pt-32">
+      <div class="max-w-xl">
+        {eyebrow && <p class="eyebrow mb-3 lg:mb-6 text-neutral-700">{eyebrow}</p>}
+
+        <h1 class="hero-heading section-heading font-display text-[2rem] leading-[1.04] tracking-tight text-neutral-900 sm:text-5xl lg:text-6xl">
+          {words.map((word, i) => (
+            <>
+              <span class="reveal-word-wrap"><span class="reveal-word" style={`transition-delay: ${i * 70}ms`}>{word}</span></span>
+              {i < words.length - 1 && ' '}
+            </>
+          ))}
+          {headingItalic && (
+            <>
+              <br />
+              <span class="reveal-word-wrap"><span class="reveal-word italic font-normal text-neutral-700" style={`transition-delay: ${words.length * 70}ms`}>{headingItalic}</span></span>
+            </>
+          )}
+        </h1>
+
+        {subheading && (
+          <p class="hero-sub mt-3 lg:mt-6 max-w-lg text-sm leading-relaxed text-neutral-600 sm:text-base lg:text-lg">
+            {subheading}
+          </p>
+        )}
+
+        <div class="hero-ctas mt-4 lg:mt-8 flex flex-wrap items-center gap-3 lg:gap-4">
+          {ctaPrimary && (
+            <a href={ctaPrimary.href} class="btn-primary">
+              <span>{ctaPrimary.label}</span>
+              <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
+                <path d="M1 5H13M13 5L9 1M13 5L9 9" stroke="currentColor" stroke-width="1" />
+              </svg>
+            </a>
+          )}
+          {ctaSecondary && (
+            <a href={ctaSecondary.href} class="btn-secondary">
+              {ctaSecondary.label}
+            </a>
+          )}
+        </div>
+
+        {trustSignals && trustSignals.length > 0 && (
+          <div class="hero-trust mt-4 lg:mt-10 flex flex-wrap items-center gap-x-6 gap-y-2 lg:gap-x-8 lg:gap-y-3 border-t border-neutral-900/10 pt-3 lg:pt-6">
+            {trustSignals.map((signal, i) => (
+              <div class="flex items-center gap-3">
+                {i > 0 && <span class="hidden sm:block h-3 w-px bg-neutral-300"></span>}
+                <span class="text-xs uppercase tracking-[0.14em] text-neutral-600">{signal}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+
+    {/* RIGHT — full-height video (7/12). object-contain so baked-in captions
+        on the video aren't cropped off at the edges. */}
+    <div class="relative bg-black flex-1 lg:flex-initial lg:col-span-7 min-h-[20vh] lg:min-h-0">
+      {video ? (
+        <>
+          <video
+            id="hero-video"
+            src={video}
+            poster={videoPoster}
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="auto"
+            aria-label={imageAlt}
+            class="hero-video absolute inset-0 h-full w-full object-contain"
+          ></video>
+
+          {/* Custom mute/play overlay controls */}
+          <div class="absolute right-4 bottom-4 z-20 flex items-center gap-2 lg:right-6 lg:bottom-6">
+            <button
+              type="button"
+              id="hero-video-mute"
+              aria-label="Unmute video"
+              aria-pressed="true"
+              class="hero-video-btn group relative flex items-center gap-2 px-4 py-2.5 bg-black/60 text-white text-xs uppercase tracking-[0.14em] font-medium backdrop-blur-sm hover:bg-black/80 transition-colors"
+            >
+              <!-- Muted icon -->
+              <svg class="hero-video-icon-muted" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <line x1="23" y1="9" x2="17" y2="15"></line>
+                <line x1="17" y1="9" x2="23" y2="15"></line>
+              </svg>
+              <!-- Sound on icon -->
+              <svg class="hero-video-icon-on" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: none;">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+              </svg>
+              <span class="hero-video-label">Sound</span>
+            </button>
+            <button
+              type="button"
+              id="hero-video-play"
+              aria-label="Pause video"
+              class="hero-video-btn flex items-center justify-center h-10 w-10 bg-black/60 text-white backdrop-blur-sm hover:bg-black/80 transition-colors"
+            >
+              <!-- Pause icon (shown while playing) -->
+              <svg class="hero-video-icon-pause" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <rect x="6" y="4" width="4" height="16"></rect>
+                <rect x="14" y="4" width="4" height="16"></rect>
+              </svg>
+              <!-- Play icon (shown when paused) -->
+              <svg class="hero-video-icon-play" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="display: none;">
+                <polygon points="6 4 20 12 6 20 6 4"></polygon>
+              </svg>
+            </button>
+          </div>
+        </>
+      ) : image ? (
+        <img
+          src={image}
+          alt={imageAlt}
+          class="hero-image absolute inset-0 h-full w-full object-cover"
+          loading="eager"
+          fetchpriority="high"
+        />
+      ) : null}
+    </div>
+  </section>
+)}
+
+{variant === 'page' && (
+  <section class={`relative overflow-hidden bg-[var(--color-ivory)] ${minH} flex items-center`}>
+    <div class="mx-auto w-full max-w-[1400px] px-6 pb-16 pt-32 lg:px-12 lg:pb-24 lg:pt-40">
+      {eyebrow && <p class="eyebrow mb-6 text-neutral-700">{eyebrow}</p>}
+
+      <h1 class="hero-heading section-heading font-display max-w-4xl text-5xl leading-[1.05] tracking-tight text-neutral-900 sm:text-6xl lg:text-7xl">
+        {words.map((word, i) => (
+          <>
+            <span class="reveal-word-wrap"><span class="reveal-word" style={`transition-delay: ${i * 70}ms`}>{word}</span></span>
+            {i < words.length - 1 && ' '}
+          </>
+        ))}
+        {headingItalic && (
+          <>
+            {' '}
+            <span class="reveal-word-wrap"><span class="reveal-word italic font-normal text-neutral-700">{headingItalic}</span></span>
+          </>
+        )}
+      </h1>
+
+      {subheading && (
+        <p class="hero-sub mt-7 max-w-2xl text-lg leading-relaxed text-neutral-600">
+          {subheading}
+        </p>
+      )}
+
+      {(ctaPrimary || ctaSecondary) && (
+        <div class="mt-9 flex flex-wrap items-center gap-4">
+          {ctaPrimary && (
+            <a href={ctaPrimary.href} class="btn-primary">
+              <span>{ctaPrimary.label}</span>
+              <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
+                <path d="M1 5H13M13 5L9 1M13 5L9 9" stroke="currentColor" stroke-width="1" />
+              </svg>
+            </a>
+          )}
+          {ctaSecondary && <a href={ctaSecondary.href} class="btn-secondary">{ctaSecondary.label}</a>}
+        </div>
+      )}
+    </div>
+  </section>
+)}
+
+{variant === 'dark' && (
+  <section class={`relative overflow-hidden bg-neutral-900 text-[var(--color-ivory)] ${minH} flex items-center`}>
+    {image && (
+      <>
+        <img
+          src={image}
+          alt={imageAlt}
+          class="hero-image absolute inset-0 h-full w-full object-cover opacity-50"
+          loading="eager"
+          fetchpriority="high"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/60 to-neutral-900/20"></div>
+      </>
+    )}
+
+    <div class="relative z-10 mx-auto w-full max-w-[1400px] px-6 pb-16 pt-32 lg:px-12 lg:pb-24 lg:pt-40">
+      {eyebrow && <p class="eyebrow mb-6 text-[var(--color-accent-500)]">{eyebrow}</p>}
+
+      <h1 class="hero-heading section-heading font-display max-w-4xl text-5xl leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
+        {words.map((word, i) => (
+          <>
+            <span class="reveal-word-wrap"><span class="reveal-word" style={`transition-delay: ${i * 70}ms`}>{word}</span></span>
+            {i < words.length - 1 && ' '}
+          </>
+        ))}
+        {headingItalic && (
+          <>
+            {' '}
+            <span class="reveal-word-wrap"><span class="reveal-word italic font-normal text-[var(--color-ivory)]/80">{headingItalic}</span></span>
+          </>
+        )}
+      </h1>
+
+      {subheading && (
+        <p class="hero-sub mt-7 max-w-2xl text-lg leading-relaxed text-[var(--color-ivory)]/80">
+          {subheading}
+        </p>
+      )}
+
+      {(ctaPrimary || ctaSecondary) && (
+        <div class="mt-9 flex flex-wrap items-center gap-4">
+          {ctaPrimary && (
+            <a href={ctaPrimary.href} class="btn-primary">
+              <span>{ctaPrimary.label}</span>
+              <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
+                <path d="M1 5H13M13 5L9 1M13 5L9 9" stroke="currentColor" stroke-width="1" />
+              </svg>
+            </a>
+          )}
+          {ctaSecondary && <a href={ctaSecondary.href} class="btn-ghost">{ctaSecondary.label}</a>}
+        </div>
+      )}
+    </div>
+  </section>
+)}
+
+<script>
+  function revealHero() {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.querySelectorAll<HTMLElement>('.hero-heading .reveal-word').forEach((el) => {
+      if (prefersReducedMotion) {
+        el.style.transition = 'none';
+        el.style.transform = 'translateY(0)';
+        return;
+      }
+      el.style.transition = `transform 0.85s cubic-bezier(0.22, 1, 0.36, 1)`;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          el.style.transform = 'translateY(0)';
+        });
+      });
+    });
+
+    const sub = document.querySelector<HTMLElement>('.hero-sub');
+    const ctas = document.querySelector<HTMLElement>('.hero-ctas');
+    const trust = document.querySelector<HTMLElement>('.hero-trust');
+    [sub, ctas, trust].forEach((el, i) => {
+      if (!el) return;
+      if (prefersReducedMotion) {
+        el.style.opacity = '1';
+        return;
+      }
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(12px)';
+      el.style.transition = 'opacity 0.7s ease-out, transform 0.7s ease-out';
+      el.style.transitionDelay = `${600 + i * 120}ms`;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0)';
+        });
+      });
+    });
+
+    // Subtle Ken Burns on dark/page hero image
+    const heroImg = document.querySelector<HTMLElement>('.hero-image');
+    if (heroImg && !prefersReducedMotion) {
+      heroImg.style.transition = 'transform 14s ease-out';
+      heroImg.style.transform = 'scale(1.05)';
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          heroImg.style.transform = 'scale(1)';
+        });
+      });
+    }
+  }
+
+  function initHeroVideoControls() {
+    const video = document.getElementById('hero-video') as HTMLVideoElement | null;
+    const muteBtn = document.getElementById('hero-video-mute') as HTMLButtonElement | null;
+    const playBtn = document.getElementById('hero-video-play') as HTMLButtonElement | null;
+    if (!video) return;
+
+    if (muteBtn) {
+      const iconMuted = muteBtn.querySelector<HTMLElement>('.hero-video-icon-muted');
+      const iconOn = muteBtn.querySelector<HTMLElement>('.hero-video-icon-on');
+      const label = muteBtn.querySelector<HTMLElement>('.hero-video-label');
+
+      const sync = () => {
+        const muted = video.muted;
+        if (iconMuted) iconMuted.style.display = muted ? '' : 'none';
+        if (iconOn) iconOn.style.display = muted ? 'none' : '';
+        if (label) label.textContent = muted ? 'Sound' : 'Mute';
+        muteBtn.setAttribute('aria-pressed', muted ? 'true' : 'false');
+        muteBtn.setAttribute('aria-label', muted ? 'Unmute video' : 'Mute video');
+      };
+
+      muteBtn.addEventListener('click', () => {
+        video.muted = !video.muted;
+        if (!video.muted && video.paused) video.play().catch(() => {});
+        sync();
+      });
+      video.addEventListener('volumechange', sync);
+      sync();
+    }
+
+    if (playBtn) {
+      const iconPause = playBtn.querySelector<HTMLElement>('.hero-video-icon-pause');
+      const iconPlay = playBtn.querySelector<HTMLElement>('.hero-video-icon-play');
+
+      const sync = () => {
+        const paused = video.paused;
+        if (iconPause) iconPause.style.display = paused ? 'none' : '';
+        if (iconPlay) iconPlay.style.display = paused ? '' : 'none';
+        playBtn.setAttribute('aria-label', paused ? 'Play video' : 'Pause video');
+      };
+
+      playBtn.addEventListener('click', () => {
+        if (video.paused) video.play().catch(() => {});
+        else video.pause();
+      });
+      video.addEventListener('play', sync);
+      video.addEventListener('pause', sync);
+      sync();
+    }
+  }
+
+  revealHero();
+  initHeroVideoControls();
+  document.addEventListener('astro:page-load', () => {
+    revealHero();
+    initHeroVideoControls();
+  });
+</script>

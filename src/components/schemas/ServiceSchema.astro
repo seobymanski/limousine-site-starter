@@ -1,0 +1,28 @@
+---
+import { siteConfig } from '../../data/site-config';
+
+interface Props {
+  name: string;
+  description: string;
+}
+
+const { name, description } = Astro.props;
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": name,
+  "description": description,
+  "provider": {
+    "@type": "Organization",
+    "name": siteConfig.fullName,
+    "url": siteConfig.url,
+  },
+  "areaServed": siteConfig.cities.map(loc => ({
+    "@type": "City",
+    "name": `${loc.city}, ${loc.state}`,
+  })),
+};
+---
+
+<script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />

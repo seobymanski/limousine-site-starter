@@ -1,0 +1,109 @@
+---
+/**
+ * WhyChooseUs - 7 value props, editorial alternating layout.
+ * No icons (sleek minimal). Each item: oversized number + title + 1-line description.
+ */
+
+interface Item {
+  number: string;
+  title: string;
+  description: string;
+}
+
+interface Props {
+  eyebrow?: string;
+  heading?: string;
+  items?: Item[];
+}
+
+const defaultItems: Item[] = [
+  {
+    number: '01',
+    title: 'CAA Partner',
+    description:
+      'Official Luxury Chauffeured Partner of the strategic partnership, the network private jet operators trust.',
+  },
+  {
+    number: '02',
+    title: '1,100+ Cities',
+    description:
+      'Local-led ground operations in over a thousand destinations on six continents. One number, every market.',
+  },
+  {
+    number: '03',
+    title: '25+ Years',
+    description:
+      'Founded in 1996 by [FOUNDER]. Three decades of running ground for principals, talent, and family offices.',
+  },
+  {
+    number: '04',
+    title: 'Aviation-First Tech',
+    description:
+      'Real-time tail tracking, FBO coordination, and dispatch systems built around how the private aviation world actually operates.',
+  },
+  {
+    number: '05',
+    title: 'Newer Fleet, W-2 Chauffeurs',
+    description:
+      'Late-model sedans, SUVs, Sprinters, and coaches. Named, full-time chauffeurs on payroll. No gig drivers.',
+  },
+  {
+    number: '06',
+    title: '24/7 Reservations',
+    description:
+      'A live human answers every call, every hour. Schedule shifts, tail diversions, late ramp arrivals, all covered.',
+  },
+  {
+    number: '07',
+    title: 'Discrete by Design',
+    description:
+      'NDA-trained chauffeurs, unmarked vehicles on request, secure dispatch protocols. Quiet service is the service.',
+  },
+];
+
+const {
+  eyebrow = 'Why [BRAND]',
+  heading = 'The standard private aviation ground operations is built on.',
+  items = defaultItems,
+} = Astro.props;
+---
+
+<section class="relative bg-white py-24 lg:py-32">
+  <div class="mx-auto max-w-[1400px] px-6 lg:px-12">
+    <div class="mb-16 grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-end">
+      <div class="lg:col-span-7">
+        <p class="eyebrow mb-5">{eyebrow}</p>
+        <h2 class="section-heading font-display text-4xl leading-[1.08] tracking-tight text-neutral-900 sm:text-5xl lg:text-6xl">
+          {heading}
+        </h2>
+      </div>
+      <div class="lg:col-span-5">
+        <p class="text-lg leading-relaxed text-neutral-600">
+          Seven reasons private flight departments, charter operators, and family offices rely on us as their single ground transportation partner.
+        </p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2">
+      {items.map((item, i) => (
+        <div
+          class:list={[
+            'why-item group relative flex items-start gap-8 border-t border-neutral-900/10 py-10 transition-colors duration-300 hover:bg-[var(--color-ivory)]',
+            i === 0 || i === 1 ? '' : '',
+            i % 2 === 0 ? 'lg:border-r lg:border-r-neutral-900/10 lg:pr-12' : 'lg:pl-12',
+          ]}
+        >
+          <span class="font-display text-4xl text-neutral-300 transition-colors duration-300 group-hover:text-[var(--color-accent-500)] shrink-0">
+            {item.number}
+          </span>
+          <div class="flex-1">
+            <h3 class="font-display text-2xl tracking-tight text-neutral-900">
+              {item.title}
+            </h3>
+            <p class="mt-2 text-base leading-relaxed text-neutral-600">{item.description}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

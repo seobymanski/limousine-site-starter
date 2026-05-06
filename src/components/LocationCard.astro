@@ -1,0 +1,46 @@
+---
+interface Props {
+  city: string;
+  state: string;
+  href: string;
+  /** Optional sub-line (e.g. region or primary FBO) */
+  detail?: string;
+  /** When provided, uses image background; otherwise renders text-only card */
+  image?: string;
+  imageAlt?: string;
+}
+
+const { city, state, href, detail, image, imageAlt = '' } = Astro.props;
+---
+
+<a
+  href={href}
+  class="location-card group relative flex flex-col justify-between bg-black p-7 min-h-[200px] text-[var(--color-ivory)] transition-all duration-500 hover:bg-neutral-900 hover:shadow-md overflow-hidden"
+>
+  {image && (
+    <div class="absolute inset-0 z-0">
+      <img src={image} alt={imageAlt} class="h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-25" loading="lazy" />
+    </div>
+  )}
+
+  <div class="relative z-10">
+    <p class="text-xs uppercase tracking-[0.14em] text-[var(--color-ivory)]/60">{state}</p>
+    <h3 class="mt-2 font-display text-3xl tracking-tight text-[var(--color-ivory)]">{city}</h3>
+    {detail && <p class="mt-2 text-sm text-[var(--color-ivory)]/70">{detail}</p>}
+  </div>
+
+  <div class="relative z-10 mt-6 flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-[var(--color-ivory)]">
+    <span>Transfer</span>
+    <svg
+      width="20"
+      height="10"
+      viewBox="0 0 20 10"
+      fill="none"
+      class="transition-transform duration-500 group-hover:translate-x-1.5"
+    >
+      <path d="M1 5H19M19 5L15 1M19 5L15 9" stroke="currentColor" stroke-width="1" />
+    </svg>
+  </div>
+
+  <span class="absolute left-0 top-0 h-px w-0 bg-[var(--color-accent-500)] transition-all duration-500 group-hover:w-full z-10"></span>
+</a>

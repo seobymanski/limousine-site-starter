@@ -1,0 +1,92 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+
+const title = 'Privacy Policy · [BRAND] Ground Transport';
+const description =
+  'How [BRAND] collects, uses, and protects client data, FBO trip details, and discreet booking records for private aviation ground transportation.';
+---
+
+<BaseLayout title={title} description={description}>
+  <Hero
+    variant="page"
+    eyebrow="Legal"
+    heading="Privacy Policy"
+    subheading="How we handle the information you share with us when booking ground transportation."
+  />
+
+  <section class="border-t border-neutral-900/10 bg-[var(--color-ivory)] py-20">
+    <div class="mx-auto max-w-3xl px-6">
+      <Breadcrumb
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'Privacy Policy', href: '/privacy/' },
+        ]}
+      />
+
+      <article class="prose-luxury mt-10">
+        <p class="text-sm text-neutral-500">Last updated: May 2026</p>
+
+        <h2>What we collect</h2>
+        <p>
+          When you book a transfer, request a quote, or contact our reservations team, we collect
+          the information you provide: name, contact details, flight or tail number, pickup and
+          destination, and any preferences you share for the trip. We also receive operational
+          data from FBOs, our chauffeurs, and flight-tracking systems to coordinate your arrival.
+        </p>
+
+        <h2>How we use it</h2>
+        <p>
+          We use this information to dispatch your transfer, coordinate with the FBO or aircraft
+          crew, communicate during the trip, send receipts, and manage your account if you book
+          repeatedly with us. We do not sell your information, and we do not share trip details
+          with third parties outside the operational chain required to deliver your service.
+        </p>
+
+        <h2>Affiliate network</h2>
+        <p>
+          [BRAND] operates a vetted affiliate network across more than 1,100 cities.
+          When your trip is dispatched outside our owned-and-operated markets, an affiliate
+          receives the minimum information required to deliver the service: pickup and dropoff,
+          aircraft details, and the principal's name. Affiliates are bound by our standards for
+          fleet quality, driver vetting, and confidentiality.
+        </p>
+
+        <h2>Discretion for high-profile clients</h2>
+        <p>
+          For Discrete VIP and security-coordinated transfers, additional confidentiality
+          measures apply. Trip details are restricted to the named coordinators on the account,
+          and our chauffeurs sign confidentiality terms before being assigned to such trips.
+        </p>
+
+        <h2>Cookies and analytics</h2>
+        <p>
+          Our website uses standard analytics to understand traffic patterns and improve the
+          booking experience. We do not use third-party advertising trackers.
+        </p>
+
+        <h2>Your rights</h2>
+        <p>
+          You can request a copy of the information we hold about you, or ask us to delete it,
+          by contacting <a href="mailto:reservations@example.com"
+            >reservations@example.com</a
+          >. We respond within 30 days.
+        </p>
+
+        <h2>Contact</h2>
+        <p>
+          Questions about this policy: call <a href="tel:+15555555555">555.555.5555</a> or email
+          <a href="mailto:reservations@example.com"
+            >reservations@example.com</a
+          >.
+        </p>
+
+        <p class="mt-12 rounded-sm border border-neutral-900/10 bg-white/60 p-6 text-sm text-neutral-600">
+          This page is a starter privacy summary. Your legal counsel should review and finalize
+          the language before high-volume use.
+        </p>
+      </article>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,95 @@
+---
+/**
+ * AirportQuickFactsPanel
+ *
+ * Renders the "Airport Quick Facts" block on airport pages — runway count,
+ * elevation, customs, slot/PPR rules etc. with a free-form prose paragraph
+ * underneath for context.
+ */
+
+interface QuickFacts {
+  runwayCount?: string;
+  longestRunway?: string;
+  elevation?: string;
+  hours?: string;
+  customsAvailable?: boolean;
+  slotPPR?: string;
+  body?: string;
+  sourceUrl?: string;
+}
+
+interface Props {
+  airportName: string;
+  airportIcao: string;
+  airportIata?: string;
+  facts: QuickFacts;
+}
+
+const { airportName, airportIcao, airportIata, facts } = Astro.props;
+
+const rows: Array<{ label: string; value: string }> = [
+  { label: 'ICAO', value: airportIcao },
+  ...(airportIata ? [{ label: 'IATA', value: airportIata }] : []),
+  ...(facts.runwayCount ? [{ label: 'Runways', value: facts.runwayCount }] : []),
+  ...(facts.longestRunway ? [{ label: 'Longest runway', value: facts.longestRunway }] : []),
+  ...(facts.elevation ? [{ label: 'Elevation', value: facts.elevation }] : []),
+  ...(facts.hours ? [{ label: 'Hours', value: facts.hours }] : []),
+  ...(typeof facts.customsAvailable === 'boolean'
+    ? [{ label: 'Customs', value: facts.customsAvailable ? 'Available on field' : 'Not on field' }]
+    : []),
+  ...(facts.slotPPR ? [{ label: 'Slot / PPR', value: facts.slotPPR }] : []),
+];
+
+const hasBody = Boolean(facts.body);
+const hasFacts = rows.length > 0;
+---
+
+{(hasBody || hasFacts) && (
+  <section class="bg-[var(--color-ivory)] py-20 lg:py-28 border-y border-neutral-900/10">
+    <div class="mx-auto max-w-[1400px] px-6 lg:px-12">
+      <div class="mb-12 lg:mb-16 max-w-3xl">
+        <p class="eyebrow mb-4">Airport Quick Facts</p>
+        <h2 class="section-heading font-display text-3xl leading-[1.1] tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
+          {airportName} at a glance.
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+        {hasFacts && (
+          <div class="lg:col-span-5">
+            <dl class="border-t border-neutral-900/10">
+              {rows.map((r) => (
+                <div class="grid grid-cols-12 gap-4 py-4 border-b border-neutral-900/10">
+                  <dt class="col-span-5 text-xs uppercase tracking-[0.14em] text-neutral-500 self-center">
+                    {r.label}
+                  </dt>
+                  <dd class="col-span-7 font-display text-lg tracking-tight text-neutral-900">
+                    {r.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            {facts.sourceUrl && (
+              <a
+                href={facts.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="link-underline tracked-nav inline-block mt-6"
+              >
+                Official airport site →
+              </a>
+            )}
+          </div>
+        )}
+        {hasBody && (
+          <div class="lg:col-span-7">
+            <div
+              class="prose-luxury text-neutral-700 leading-relaxed"
+              set:html={facts.body}
+            ></div>
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+)}

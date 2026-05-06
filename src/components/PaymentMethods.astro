@@ -1,0 +1,28 @@
+---
+/**
+ * PaymentMethods — accepted-card display for the footer.
+ * Monochrome card silhouettes with brand wordmarks, fitting the
+ * sleek-minimal aesthetic (no full-color brand logos).
+ */
+const cards = [
+  { name: 'Visa', label: 'VISA' },
+  { name: 'Mastercard', label: 'MC' },
+  { name: 'American Express', label: 'AMEX' },
+  { name: 'Discover', label: 'DISC' },
+];
+---
+
+<div class="space-y-3">
+  <p class="eyebrow">Payment Accepted</p>
+  <div class="flex items-center gap-2.5" aria-label="Accepted payment methods">
+    {cards.map((card) => (
+      <div
+        class="inline-flex h-7 min-w-[44px] items-center justify-center border border-neutral-900/15 bg-white px-2 text-[0.6rem] font-medium tracking-[0.12em] text-neutral-700 uppercase"
+        aria-label={card.name}
+        title={card.name}
+      >
+        {card.label}
+      </div>
+    ))}
+  </div>
+</div>

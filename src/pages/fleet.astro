@@ -1,0 +1,249 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import CTA from '../components/CTA.astro';
+import SectionDivider from '../components/SectionDivider.astro';
+import LocalBusinessSchema from '../components/schemas/LocalBusinessSchema.astro';
+import BreadcrumbSchema from '../components/schemas/BreadcrumbSchema.astro';
+import { siteConfig } from '../data/site-config';
+import { loadPageContent } from '../lib/content';
+
+const content = loadPageContent('fleet');
+const fm = content?.frontmatter;
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Fleet', href: '/fleet/' },
+];
+
+const fleetCategories = [
+  {
+    name: 'Sedan',
+    bestFor: 'Solo principal or pair of passengers, light bag count.',
+    capacity: 'Up to 3 passengers, 2 to 3 standard bags.',
+    description:
+      'The sedan is the workhorse. Black, late-model, executive interior, professional chauffeur. It is the right call for the principal flying in for a meeting, the executive heading to a working dinner, or the lawyer commuting from Teterboro to a deposition in midtown. When the trip is one or two passengers and the bag situation is manageable, the sedan does the job without overcommitting on size or cost.',
+    vehicles: [
+      {
+        name: 'Mercedes-Benz S-Class',
+        image: '/fleet/mercedes-s-class.png',
+        capacity: '1 – 3 passengers',
+        luggage: '2 standard bags',
+        notes: 'Flagship sedan. Rear cabin shielded by privacy glass, calf-rest rear seating, climate by zone.',
+      },
+      {
+        name: 'Cadillac CT5',
+        image: '/fleet/cadillac-ct5.png',
+        capacity: '1 – 3 passengers',
+        luggage: '2 standard bags',
+        notes: 'Late-model sedan with quiet cabin and tinted privacy across the back row.',
+      },
+    ],
+  },
+  {
+    name: 'SUV',
+    bestFor: 'Principal plus spouse, small family, or two executives with full luggage.',
+    capacity: 'Up to 5 passengers, 4 to 5 large bags.',
+    description:
+      'The SUV is the most-requested vehicle for FBO transfers when the trip involves real luggage. Golf clubs, ski bags, weekend bags for a family of four, equipment cases for a creative shoot. The SUV also handles weather better than a sedan, which matters at fields like KASE in Aspen or KHPN in winter. When in doubt between a sedan and SUV, the SUV usually wins on comfort. Bag space tells the truth.',
+    vehicles: [
+      {
+        name: 'Range Rover',
+        image: '/fleet/range-rover.png',
+        capacity: '1 – 4 passengers',
+        luggage: '4 – 5 standard bags',
+        notes: 'Full-leather interior, all-weather drive, discreet exterior profile.',
+      },
+      {
+        name: 'Cadillac Escalade',
+        image: '/fleet/cadillac-escalade.png',
+        capacity: '1 – 6 passengers',
+        luggage: '6 – 7 standard bags',
+        notes: 'ESV variant on most trips. Captain-chair second row, climate-controlled rear, full luggage hold.',
+      },
+    ],
+  },
+  {
+    name: 'Sprinter Van',
+    bestFor: 'Flight crews, executive teams, principals who want to work in transit, or trips with significant luggage.',
+    capacity: 'Up to 14 passengers depending on configuration, plus large bag capacity.',
+    description:
+      "The Sprinter is the right answer for crew rotations, road shows, and any trip where the passengers want privacy and room to work. Executive Sprinter configurations include captain's chairs, conference seating, and divider partitions. Production crews and security teams use the Sprinter as a mobile office, with bags stowed separately and the cabin kept quiet. For private aviation clients, the Sprinter solves the simultaneous-arrival problem: principal in an SUV, crew and bags in the Sprinter, both leaving the FBO at the same time.",
+    vehicles: [
+      {
+        name: 'Mercedes-Benz V-Class',
+        image: '/fleet/mercedes-v-class.png',
+        capacity: '1 – 6 passengers',
+        luggage: 'Heavy capacity',
+        notes: 'Conference-style facing seats, fold-out tables, on-board climate and tinted privacy.',
+      },
+      {
+        name: 'Mercedes-Benz Sprinter',
+        image: '/fleet/mercedes-sprinter.jpg',
+        capacity: '8 – 14 passengers',
+        luggage: 'Heavy capacity, full crew kit',
+        notes: 'Executive interior with captain seats, USB power, ambient lighting, dedicated luggage area.',
+      },
+    ],
+  },
+  {
+    name: 'Coach (Charter Bus)',
+    bestFor: 'Corporate events, conferences, road shows, large group movements.',
+    capacity: '30 to 56 passengers depending on coach class.',
+    description:
+      'The coach is what you call when the group is too large for Sprinters. Newer motorcoach equipment with ADA-compliant configurations available, professional drivers with clean DOT records, and the same dispatch backbone that runs our black car operation. Common use cases include conference shuttles between hotel and venue, corporate offsites, sports team transport, and multi-stop tours. Coaches can be reserved as part of a multi-vehicle package alongside sedans and SUVs, with one account manager coordinating the full move.',
+    vehicles: [
+      {
+        name: 'Mini-Coach',
+        image: '/fleet/mini-coach.png',
+        capacity: '20 – 28 passengers',
+        luggage: 'Below-deck storage',
+        notes: 'Leather seating, climate, AV. Designed for short multi-stop hops with comfort.',
+      },
+      {
+        name: 'Motor Coach',
+        image: '/fleet/motor-coach.png',
+        capacity: '40 – 56 passengers',
+        luggage: 'Full luggage hold',
+        notes: 'Full-size charter coach. Restroom on board, reclining seats, overhead storage, AV system.',
+      },
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title={fm?.title || 'Fleet · [BRAND]'}
+  description={fm?.description || 'Late-model luxury fleet. Sedans, SUVs, executive Sprinters, mini-coaches, and full-size charter motor coaches, with every vehicle owned and W-2 chauffeur-staffed by [BRAND].'}
+  ogImage={fm?.ogImage}
+>
+  <LocalBusinessSchema slot="head" />
+  <BreadcrumbSchema slot="head" items={breadcrumbs} />
+
+  <Hero
+    variant="page"
+    eyebrow="The Fleet"
+    heading={fm?.h1 || 'Newer sedans. Bigger Sprinters.'}
+    headingItalic="Coaches when you need them."
+    subheading={fm?.heroSubhead || 'Every vehicle is owned and operated by [BRAND]. No rental hand-offs, no third-party plates. Late-model interiors, climate, and tinted privacy across the entire roster.'}
+    ctaPrimary={{ label: 'Reserve a Transfer', href: '/contact/' }}
+    ctaSecondary={{ label: `Call ${siteConfig.phone}`, href: siteConfig.phoneHref }}
+  />
+
+  <Breadcrumb items={breadcrumbs} />
+
+  {/* Intro */}
+  <section class="bg-[var(--color-ivory)] pt-16 lg:pt-24">
+    <div class="mx-auto max-w-3xl px-6 lg:px-12">
+      <h2 class="font-display text-3xl leading-[1.1] tracking-tight text-neutral-900 sm:text-4xl">
+        Pick the right vehicle, not the biggest one.
+      </h2>
+      <p class="mt-6 text-base leading-relaxed text-neutral-700">
+        Most of the time, the right vehicle is obvious to a chauffeur who has done this for years. A solo principal flying in for dinner does not need a Sprinter. A flight crew of five with bags should not be jammed into an SUV. The fleet at [BRAND] is built around the trips we actually run, not a parts catalog. Below is practical guidance on when each category is the right call.
+      </p>
+    </div>
+  </section>
+
+  {/* Categories — each with its description and the actual vehicles in that category */}
+  <section class="bg-[var(--color-ivory)] py-16 lg:py-24">
+    <div class="mx-auto max-w-[1400px] px-6 lg:px-12 space-y-24 lg:space-y-32">
+      {fleetCategories.map((cat, ci) => (
+        <div>
+          {/* Category header */}
+          <div class="border-t border-neutral-900/10 pt-10 lg:pt-12 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
+            <div class="lg:col-span-4">
+              <p class="text-xs uppercase tracking-[0.18em] text-[var(--color-accent-700)]">
+                {String(ci + 1).padStart(2, '0')} · Category
+              </p>
+              <h2 class="mt-4 font-display text-4xl leading-[1.05] tracking-tight text-neutral-900 sm:text-5xl">
+                {cat.name}
+              </h2>
+              <dl class="mt-8 space-y-4">
+                <div>
+                  <dt class="text-xs uppercase tracking-[0.14em] text-neutral-500">Best for</dt>
+                  <dd class="mt-1.5 text-sm leading-relaxed text-neutral-700">{cat.bestFor}</dd>
+                </div>
+                <div>
+                  <dt class="text-xs uppercase tracking-[0.14em] text-neutral-500">Typical capacity</dt>
+                  <dd class="mt-1.5 text-sm leading-relaxed text-neutral-700">{cat.capacity}</dd>
+                </div>
+              </dl>
+            </div>
+            <div class="lg:col-span-8">
+              <p class="text-base leading-relaxed text-neutral-700 max-w-prose">{cat.description}</p>
+            </div>
+          </div>
+
+          {/* Vehicles in this category */}
+          <div class="mt-14 lg:mt-20 space-y-16 lg:space-y-24">
+            {cat.vehicles.map((v, vi) => (
+              <article class={`grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-14 lg:items-center ${vi % 2 === 1 ? 'lg:[&>div:first-child]:order-2' : ''}`}>
+                <div class="lg:col-span-7">
+                  <div class="relative aspect-[16/10] overflow-hidden">
+                    <img
+                      src={v.image}
+                      alt={`${v.name} — ${cat.name}`}
+                      class="absolute inset-0 h-full w-full object-contain mix-blend-multiply"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+                <div class="lg:col-span-5">
+                  <p class="text-xs uppercase tracking-[0.14em] text-neutral-500">{cat.name}</p>
+                  <h3 class="mt-3 font-display text-2xl leading-[1.15] tracking-tight text-neutral-900 sm:text-3xl">
+                    {v.name}
+                  </h3>
+                  <p class="mt-4 text-base leading-relaxed text-neutral-700 max-w-prose">
+                    {v.notes}
+                  </p>
+                  <dl class="mt-6 grid grid-cols-2 gap-x-8 gap-y-4 border-t border-neutral-900/10 pt-5">
+                    <div>
+                      <dt class="text-xs uppercase tracking-[0.14em] text-neutral-500">Capacity</dt>
+                      <dd class="mt-1.5 font-display text-base tracking-tight text-neutral-900">{v.capacity}</dd>
+                    </div>
+                    <div>
+                      <dt class="text-xs uppercase tracking-[0.14em] text-neutral-500">Luggage</dt>
+                      <dd class="mt-1.5 font-display text-base tracking-tight text-neutral-900">{v.luggage}</dd>
+                    </div>
+                  </dl>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <SectionDivider variant="hairline" />
+
+  <section class="bg-white py-24 lg:py-32">
+    <div class="mx-auto max-w-[1400px] px-6 lg:px-12 grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-center lg:gap-16">
+      <div class="lg:col-span-5">
+        <p class="eyebrow mb-5">Operations</p>
+        <h2 class="section-heading font-display text-4xl tracking-tight text-neutral-900 sm:text-5xl">
+          Owned, garaged, dispatched in-house.
+        </h2>
+      </div>
+      <div class="lg:col-span-7 space-y-5 text-base leading-relaxed text-neutral-700">
+        <p>
+          Every car in the [BRAND] fleet is owned by the company, garaged at one of our three operating bases, and driven by a full-time payroll chauffeur.
+        </p>
+        <p>
+          The operations team services and details every vehicle on a fixed rotation. No surprise rental units, no swapped-in third-party plates, no driver who showed up that morning to pick up your principal.
+        </p>
+        <p>
+          For markets outside our three home bases, [BRAND] partners only with vetted operators that meet the same fleet-age, insurance, and chauffeur-training standards. The dispatch desk in Teterboro is the one and only point of contact.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <CTA
+    variant="dark"
+    eyebrow="Reservations · 24/7"
+    heading="Need a specific vehicle for an upcoming trip?"
+    description="Reservations matches the right car to your manifest, FBO, and luggage count. Speak with the team."
+  />
+</BaseLayout>

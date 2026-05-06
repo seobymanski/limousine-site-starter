@@ -1,0 +1,60 @@
+---
+/**
+ * ThreePillars — the three brand stories the live site emphasizes:
+ * Our Chauffeurs · Vehicle Quality · Technology and Analytics.
+ * Editorial three-column layout with hairline dividers between columns.
+ */
+const pillars = [
+  {
+    number: '01',
+    eyebrow: 'Our Chauffeurs',
+    heading: 'Held to the same standard as the pilots up front.',
+    body: 'A professional chauffeur is the cornerstone of a successful trip. Just as private pilots are expected to go above and beyond, we hold our chauffeurs to the same standard. Experience and punctuality are baseline. The difference is service judgment, area knowledge, and the kind of presence that lets the principal forget the ride was even part of the day.',
+  },
+  {
+    number: '02',
+    eyebrow: 'Vehicle Quality',
+    heading: 'Newer models. Low mileage. Pristine condition.',
+    body: 'The [BRAND] fleet runs on a fixed rotation, with vehicles refreshed regularly to keep safety features current and the cabin pristine. Sedans, SUVs, executive Sprinters, and motor coaches are owned, garaged, and maintained at our three operating bases, with affiliate partners held to the same fleet-age and condition standards.',
+  },
+  {
+    number: '03',
+    eyebrow: 'Technology and Analytics',
+    heading: 'Built around how the private aviation world actually operates.',
+    body: 'Real-time tail tracking, FBO coordinator integrations, and dispatch systems keyed to private aviation flow. Our APIs slot into client booking platforms so flight departments and family offices see one unified view of every leg. Data-driven analytics surface friction before it becomes a problem.',
+  },
+];
+---
+
+<section class="border-t border-neutral-900/10 bg-white py-24 lg:py-32">
+  <div class="mx-auto max-w-[1400px] px-6 lg:px-12">
+    <div class="mb-16 grid grid-cols-1 gap-8 lg:grid-cols-12">
+      <div class="lg:col-span-5">
+        <p class="eyebrow mb-5">The Standard</p>
+        <h2 class="section-heading font-display text-4xl tracking-tight text-neutral-900 sm:text-5xl lg:text-6xl">
+          Three things drive every trip.
+        </h2>
+      </div>
+      <div class="lg:col-span-6 lg:col-start-7 self-end">
+        <p class="text-base leading-relaxed text-neutral-600">
+          The reason flight departments and family offices keep coming back is not one thing. It is the chauffeurs, the vehicles, and the technology working together, every leg, every city.
+        </p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-px bg-neutral-900/10 md:grid-cols-3">
+      {pillars.map((pillar) => (
+        <article class="bg-white p-8 lg:p-10 transition-colors duration-500 hover:bg-[var(--color-ivory)]">
+          <span class="font-display text-2xl text-neutral-400">{pillar.number}</span>
+          <p class="eyebrow mt-6">{pillar.eyebrow}</p>
+          <h3 class="section-heading mt-3 font-display text-2xl tracking-tight text-neutral-900 lg:text-3xl">
+            {pillar.heading}
+          </h3>
+          <p class="mt-5 text-sm leading-relaxed text-neutral-600">
+            {pillar.body}
+          </p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,57 @@
+---
+/**
+ * MarkdownBody
+ * Renders a pre-converted HTML string from the seo-writer markdown files
+ * with the luxury prose treatment. Wraps the body in an editorial layout
+ * with a sticky TOC.
+ */
+
+interface Props {
+  html: string;
+  /** Show table-of-contents sidebar (desktop only) */
+  showTOC?: boolean;
+}
+
+const { html, showTOC = true } = Astro.props;
+---
+
+<article class="bg-[var(--color-ivory)] py-20 lg:py-28">
+  <div class={`mx-auto max-w-[1400px] px-6 lg:px-12 ${showTOC ? 'grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16' : ''}`}>
+    {showTOC && (
+      <aside class="hidden lg:col-span-3 lg:block">
+        <div class="sticky top-32 space-y-6">
+          <p class="eyebrow">On this page</p>
+          <nav class="space-y-3 text-sm text-neutral-600" id="md-toc"></nav>
+        </div>
+      </aside>
+    )}
+
+    <div class={showTOC ? 'lg:col-span-9' : ''}>
+      <div class="prose-luxury markdown-body" set:html={html}></div>
+    </div>
+  </div>
+</article>
+
+<script>
+  function buildMarkdownTOC() {
+    const body = document.querySelector('.markdown-body');
+    const toc = document.getElementById('md-toc');
+    if (!body || !toc) return;
+    toc.innerHTML = '';
+    const h2s = body.querySelectorAll('h2');
+    h2s.forEach((h, i) => {
+      let id = h.id;
+      if (!id) {
+        id = 'h-' + i + '-' + (h.textContent || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        h.id = id;
+      }
+      const a = document.createElement('a');
+      a.href = '#' + id;
+      a.textContent = h.textContent;
+      a.className = 'block hover:text-neutral-900 transition-colors';
+      toc.appendChild(a);
+    });
+  }
+  buildMarkdownTOC();
+  document.addEventListener('astro:page-load', buildMarkdownTOC);
+</script>

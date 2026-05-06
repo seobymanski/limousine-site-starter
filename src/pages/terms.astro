@@ -1,0 +1,108 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+
+const title = 'Terms of Service · [BRAND] Ground Transport';
+const description =
+  'Terms governing the use of [BRAND] ground transportation services for the private aviation community, including reservation, cancellation, and chauffeur policies.';
+---
+
+<BaseLayout title={title} description={description}>
+  <Hero
+    variant="page"
+    eyebrow="Legal"
+    heading="Terms of Service"
+    subheading="Guidelines that govern the use of our chauffeured ground transportation services."
+  />
+
+  <section class="border-t border-neutral-900/10 bg-[var(--color-ivory)] py-20">
+    <div class="mx-auto max-w-3xl px-6">
+      <Breadcrumb
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'Terms of Service', href: '/terms/' },
+        ]}
+      />
+
+      <article class="prose-luxury mt-10">
+        <p class="text-sm text-neutral-500">Last updated: May 2026</p>
+
+        <h2>Reservations and confirmation</h2>
+        <p>
+          A reservation is confirmed once you receive written confirmation from our reservations
+          team. Phone bookings made outside business hours are confirmed during the next
+          available shift. For private jet transfers, we recommend providing tail number and
+          FBO at the time of booking so we can coordinate ramp access.
+        </p>
+
+        <h2>Cancellations</h2>
+        <p>
+          Sedan and SUV transfers may be cancelled without charge up to two hours before pickup.
+          Sprinter and Coach reservations require longer notice (typically 24-48 hours)
+          because of advance crew and vehicle commitments. Same-day cancellations on
+          high-vehicle-class trips may incur a charge equivalent to the booked transfer.
+        </p>
+
+        <h2>Wait time and changes en route</h2>
+        <p>
+          Standard wait time is included for the first fifteen minutes after the requested
+          pickup time. Beyond that, additional wait time is charged at the agreed hourly rate.
+          Routing changes mid-trip are accommodated where possible and billed accordingly.
+        </p>
+
+        <h2>Flight tracking and diversions</h2>
+        <p>
+          For airport and FBO transfers, we monitor your flight in real time and adjust pickup
+          accordingly at no additional cost. If your aircraft diverts to a different FBO or
+          airport within the same metro, we coordinate the move at the standard rate; trips
+          that divert across metro areas are repriced based on the new pickup location.
+        </p>
+
+        <h2>Driver standards and confidentiality</h2>
+        <p>
+          Our chauffeurs are full-time professionals, vetted for clean driving records, customer
+          service, and discretion. For high-profile clients, additional confidentiality terms
+          apply. Trip details are not shared outside the operational chain required to deliver
+          the service.
+        </p>
+
+        <h2>Liability</h2>
+        <p>
+          [BRAND] carries commercial auto liability and general liability coverage
+          appropriate to the scope of our service. We are not liable for delays caused by
+          factors outside our control: weather, ATC delay programs, FBO operational changes,
+          or third-party affiliate operational issues outside our owned-and-operated markets.
+        </p>
+
+        <h2>Affiliate network</h2>
+        <p>
+          When a trip is dispatched in a city outside our owned-and-operated markets, the
+          transfer is delivered by a vetted affiliate operator. Affiliates meet our published
+          standards for fleet, driver vetting, and confidentiality.
+        </p>
+
+        <h2>Disputes</h2>
+        <p>
+          Any dispute arising from your use of our service should first be raised with our
+          reservations team at <a href="mailto:reservations@example.com"
+            >reservations@example.com</a
+          >. We respond within 48 hours.
+        </p>
+
+        <h2>Contact</h2>
+        <p>
+          Questions about these terms: call <a href="tel:+15555555555">555.555.5555</a> or email
+          <a href="mailto:reservations@example.com"
+            >reservations@example.com</a
+          >.
+        </p>
+
+        <p class="mt-12 rounded-sm border border-neutral-900/10 bg-white/60 p-6 text-sm text-neutral-600">
+          This page is a starter terms summary. Your legal counsel should review and finalize
+          the language before high-volume use.
+        </p>
+      </article>
+    </div>
+  </section>
+</BaseLayout>

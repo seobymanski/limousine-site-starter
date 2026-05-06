@@ -1,0 +1,37 @@
+---
+interface Props {
+  icao: string;
+  name: string;
+  city: string;
+  href: string;
+}
+
+const { icao, name, city, href } = Astro.props;
+---
+
+<a
+  href={href}
+  class="airport-card group relative flex aspect-square flex-col justify-between bg-black p-5 text-[var(--color-ivory)] transition-all duration-400 hover:bg-neutral-900"
+>
+  <div>
+    <p class="font-display text-3xl leading-none tracking-tight">{icao}</p>
+    <p class="mt-3 text-[0.7rem] uppercase tracking-[0.12em] text-[var(--color-ivory)]/60 leading-tight line-clamp-2">
+      {name}
+    </p>
+  </div>
+
+  <div class="flex items-center justify-between gap-2 text-[0.7rem] uppercase tracking-[0.12em]">
+    <span class="text-[var(--color-ivory)]/60 truncate">
+      {city}
+    </span>
+    <svg
+      width="16"
+      height="8"
+      viewBox="0 0 16 8"
+      fill="none"
+      class="shrink-0 transition-transform duration-400 group-hover:translate-x-1"
+    >
+      <path d="M1 4H15M15 4L11 1M15 4L11 7" stroke="currentColor" stroke-width="1" />
+    </svg>
+  </div>
+</a>

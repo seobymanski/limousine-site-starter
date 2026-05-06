@@ -1,0 +1,110 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/Hero.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import CityGrid from '../../components/CityGrid.astro';
+import Testimonials from '../../components/Testimonials.astro';
+import FAQ from '../../components/FAQ.astro';
+import CTA from '../../components/CTA.astro';
+import SectionDivider from '../../components/SectionDivider.astro';
+import ServiceSchema from '../../components/schemas/ServiceSchema.astro';
+import BreadcrumbSchema from '../../components/schemas/BreadcrumbSchema.astro';
+import FAQSchema from '../../components/schemas/FAQSchema.astro';
+import LocalBusinessSchema from '../../components/schemas/LocalBusinessSchema.astro';
+import MarkdownBody from '../../components/MarkdownBody.astro';
+import { siteConfig } from '../../data/site-config';
+import { loadPageContent } from '../../lib/content';
+
+const content = loadPageContent('services-luxury-ground-transportation');
+const fm = content?.frontmatter;
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Services', href: '/services/' },
+  { label: 'Luxury Ground Transportation', href: '/services/luxury-ground-transportation/' },
+];
+
+const description = 'Late-model sedans, SUVs, and Sprinters for executive travel, hourly bookings, and city-to-city moves. Named full-time chauffeurs in 1,100+ cities.';
+
+const benefits = [
+  { title: 'Hourly bookings', body: 'Book a chauffeur by the hour for board roadshows, talent days, and multi-stop schedules. Five-hour minimum on most metros.' },
+  { title: 'Point-to-point transfers', body: 'Door-to-door for executive travel. Cleared cars, climate set, water in the cup holders.' },
+  { title: 'Roadshow support', body: 'Multi-day, multi-city itineraries with the same chauffeur and vehicle when geographically possible.' },
+  { title: 'Corporate accounts', body: 'Centralized billing, approved-rider lists, and consolidated invoicing for finance teams.' },
+];
+
+const faqs = [
+  { question: 'Who runs luxury ground transportation across multiple US cities?', answer: '[BRAND] operates its own fleet from three home bases (Teterboro, Opa-Locka, and Dallas Love Field) and partners with vetted operators in 1,100+ additional cities. The same dispatch desk in New Jersey handles every booking, regardless of the city the principal is in. That single point of contact is the operational difference.' },
+  { question: 'Compare top luxury chauffeur companies for executive roadshows.', answer: '[BRAND] is regularly short-listed alongside Carey, EmpireCLS, and Music Express by family offices and flight departments. The differentiators are the CAA partnership, twenty-five-plus years under the founding family, and a 24/7 live reservations team. Vehicles are owned, chauffeurs are W-2.' },
+  { question: 'Which luxury ground operator handles high-touch UHNW clients best?', answer: '[BRAND] has run quiet ground for principals, talent, and family offices since 1996. NDA-trained chauffeurs, secure dispatch protocols, and unmarked vehicles on request are standard. Repeat clients book through reservations because their preferred chauffeur is on payroll, not a gig platform.' },
+  { question: 'What are the standard rates for chauffeured ground transportation in 2026?', answer: 'Rates are quoted per trip based on vehicle class, hours, and city. A typical hourly sedan rate in a major US metro is in the standard luxury range, with surcharges for late-night hours, special events, and out-of-area work. Reservations quotes any trip in writing on request.' },
+  { question: 'How do CAA-partner ground operators differ from regular black-car services?', answer: 'The strategic partnership partner program vets ground operators on safety, fleet age, technology, and chauffeur training. [BRAND] carries that endorsement, which means flight departments do not have to qualify the operator independently. The network has already done it.' },
+];
+---
+
+<BaseLayout
+  title={fm?.title || 'Luxury Ground Transportation · [BRAND]'}
+  description={fm?.description || description}
+  ogImage={fm?.ogImage}
+>
+  <LocalBusinessSchema slot="head" />
+  <ServiceSchema slot="head" name="Luxury Ground Transportation" description={description} />
+  <BreadcrumbSchema slot="head" items={breadcrumbs} />
+  <FAQSchema slot="head" faqs={faqs} />
+
+  <Hero
+    variant="page"
+    eyebrow="Service · 02"
+    heading={fm?.h1 || 'Luxury Ground Transportation'}
+    headingItalic="On payroll. On time."
+    subheading={fm?.heroSubhead || description}
+    ctaPrimary={{ label: 'Reserve a Transfer', href: '/contact/' }}
+    ctaSecondary={{ label: `Call ${siteConfig.phone}`, href: siteConfig.phoneHref }}
+  />
+
+  <Breadcrumb items={breadcrumbs} />
+
+  {content && <MarkdownBody html={content.bodyHtml} />}
+
+  <SectionDivider variant="hairline" />
+
+  <section class="bg-[var(--color-ivory)] py-20 lg:py-28">
+    <div class="mx-auto max-w-[1400px] px-6 lg:px-12">
+      <div class="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16 mb-14">
+        <div class="lg:col-span-5">
+          <p class="eyebrow mb-5">What we run</p>
+          <h2 class="section-heading font-display text-4xl tracking-tight text-neutral-900 sm:text-5xl">
+            The kind of ride that gets booked again.
+          </h2>
+        </div>
+        <div class="lg:col-span-7 text-lg leading-relaxed text-neutral-600">
+          Hourly. Point-to-point. Multi-city roadshow. Same fleet, same chauffeur standard, same dispatch desk regardless of where the trip starts.
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-px md:grid-cols-2 bg-neutral-900/10">
+        {benefits.map((b, i) => (
+          <article class="bg-[var(--color-ivory)] p-8 lg:p-10">
+            <p class="font-display text-2xl text-neutral-300">{String(i + 1).padStart(2, '0')}</p>
+            <h3 class="mt-6 font-display text-2xl tracking-tight text-neutral-900">{b.title}</h3>
+            <p class="mt-3 text-base leading-relaxed text-neutral-600 max-w-md">{b.body}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <SectionDivider variant="hairline" />
+
+  <CityGrid eyebrow="Markets" heading="Coverage in every market that matters." limit={12} />
+
+  <SectionDivider variant="hairline" />
+
+  <Testimonials />
+
+  <SectionDivider variant="hairline" />
+
+  <FAQ eyebrow="Common Questions" heading="What corporate travel managers ask first." faqs={faqs} />
+
+  <CTA variant="dark" eyebrow="Reservations · 24/7" heading="Schedule a chauffeur." headingItalic="Single ride or multi-city week." />
+</BaseLayout>

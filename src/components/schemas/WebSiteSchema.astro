@@ -1,0 +1,13 @@
+---
+import { siteConfig } from '../../data/site-config';
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": siteConfig.fullName,
+  "url": siteConfig.url,
+  "description": siteConfig.description,
+};
+---
+
+<script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />

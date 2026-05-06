@@ -1,0 +1,13 @@
+{
+  "compatibility_date": "2026-04-12",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  // TODO (per-client): set to "<client>-site" (e.g. "smithdental-site")
+  "name": "starter-site",
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "assets": { "directory": "./dist", "binding": "ASSETS" },
+  "observability": { "enabled": true },
+  "vars": {
+    // TODO (per-client): set to the client's CMS Worker URL
+    "PAYLOAD_CMS_URL": "https://CLIENT-cms.workers.dev"
+  }
+}

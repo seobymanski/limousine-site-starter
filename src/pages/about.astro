@@ -1,0 +1,73 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import OfficeLocations from '../components/OfficeLocations.astro';
+import Testimonials from '../components/Testimonials.astro';
+import StatBar from '../components/StatBar.astro';
+import CTA from '../components/CTA.astro';
+import SectionDivider from '../components/SectionDivider.astro';
+import MarkdownBody from '../components/MarkdownBody.astro';
+import LocalBusinessSchema from '../components/schemas/LocalBusinessSchema.astro';
+import BreadcrumbSchema from '../components/schemas/BreadcrumbSchema.astro';
+import { loadPageContent } from '../lib/content';
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'About', href: '/about/' },
+];
+
+const content = loadPageContent('about');
+const fm = content?.frontmatter ?? {
+  title: 'About · [BRAND]',
+  description: 'Founded 1996 by [FOUNDER]. CAA partner. Three operating bases. 1,100+ cities.',
+  h1: 'About [BRAND]',
+  heroSubhead: 'Three decades, three operating bases, one family-owned company.',
+};
+---
+
+<BaseLayout title={fm.title} description={fm.description} ogImage={fm.ogImage}>
+  <LocalBusinessSchema slot="head" />
+  <BreadcrumbSchema slot="head" items={breadcrumbs} />
+
+  <Hero
+    variant="page"
+    eyebrow="About · Since 1996"
+    heading={fm.h1}
+    subheading={fm.heroSubhead}
+  />
+
+  <Breadcrumb items={breadcrumbs} />
+
+  <SectionDivider variant="hairline" />
+
+  <StatBar
+    stats={[
+      { value: 1996, label: 'Year founded' },
+      { value: 1100, suffix: '+', label: 'Cities served' },
+      { value: 3, label: 'Operating bases' },
+      { value: 25, suffix: '+', label: 'Years in business' },
+    ]}
+  />
+
+  {content && <MarkdownBody html={content.bodyHtml} />}
+
+  <SectionDivider variant="hairline" />
+
+  <OfficeLocations
+    eyebrow="Operating Bases"
+    heading="Three offices. One dispatch."
+    description="Direct ramp coordination at our home FBOs in NY/NJ, South Florida, and Texas, with partner-led ground in 1,100+ cities."
+  />
+
+  <SectionDivider variant="hairline" />
+
+  <Testimonials />
+
+  <CTA
+    variant="dark"
+    eyebrow="Reservations · 24/7"
+    heading="Talk to the team that has been doing this since 1996."
+    description="A live human answers every call. Speak directly with reservations to add [BRAND] to your flight department's preferred ground list."
+  />
+</BaseLayout>

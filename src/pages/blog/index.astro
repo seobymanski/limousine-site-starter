@@ -1,0 +1,77 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/Hero.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import CTA from '../../components/CTA.astro';
+import SectionDivider from '../../components/SectionDivider.astro';
+import LocalBusinessSchema from '../../components/schemas/LocalBusinessSchema.astro';
+import BreadcrumbSchema from '../../components/schemas/BreadcrumbSchema.astro';
+import { fetchBlogPostsByCategory } from '../../lib/payload';
+
+export const prerender = false;
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Blog', href: '/blog/' },
+];
+
+const posts = await fetchBlogPostsByCategory('blog', 50).catch(() => []);
+---
+
+<BaseLayout
+  title="Field Notes Blog · Private Aviation Ground Transport"
+  description="Field notes from the [BRAND] dispatch desk. Private aviation ground transportation, FBO coordination, and stories from twenty-five-plus years on the road."
+>
+  <LocalBusinessSchema slot="head" />
+  <BreadcrumbSchema slot="head" items={breadcrumbs} />
+
+  <Hero
+    variant="page"
+    eyebrow="Field Notes"
+    heading="From the dispatch desk."
+    headingItalic="Notes on private aviation ground."
+    subheading="Operational stories, FBO insights, seasonal field notes, and the occasional historical detour from a company that has been on the road since 1996."
+  />
+
+  <Breadcrumb items={breadcrumbs} />
+
+  <SectionDivider variant="hairline" />
+
+  <section class="bg-[var(--color-ivory)] py-20 lg:py-28">
+    <div class="mx-auto max-w-[1400px] px-6 lg:px-12">
+      {posts.length === 0 ? (
+        <div class="border border-neutral-900/10 p-16 text-center">
+          <p class="font-display text-2xl text-neutral-700">No posts published yet.</p>
+          <p class="mt-3 text-sm text-neutral-500">Check back soon. Content is in the works.</p>
+        </div>
+      ) : (
+        <div class="grid grid-cols-1 gap-px md:grid-cols-2 lg:grid-cols-3 bg-neutral-900/10">
+          {posts.map((post) => (
+            <a href={`/blog/${post.slug}/`} class="group bg-[var(--color-ivory)] p-8 lg:p-10 flex flex-col transition-colors duration-300 hover:bg-white">
+              {post.featuredImage && (
+                <div class="aspect-[4/3] mb-6 overflow-hidden bg-neutral-200">
+                  <img src={post.featuredImage} alt={post.featuredImageAlt || post.title} class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]" loading="lazy" />
+                </div>
+              )}
+              <p class="text-xs uppercase tracking-[0.14em] text-neutral-500">
+                {new Date(post.publishedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} · {post.readingTime} min read
+              </p>
+              <h2 class="mt-4 font-display text-2xl tracking-tight text-neutral-900 group-hover:text-neutral-700 transition-colors">
+                {post.title}
+              </h2>
+              <p class="mt-3 text-sm leading-relaxed text-neutral-600 flex-1">{post.excerpt}</p>
+              <span class="mt-6 flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-neutral-700">
+                Read article
+                <svg width="20" height="10" viewBox="0 0 20 10" fill="none" class="transition-transform duration-500 group-hover:translate-x-1.5">
+                  <path d="M1 5H19M19 5L15 1M19 5L15 9" stroke="currentColor" stroke-width="1" />
+                </svg>
+              </span>
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+
+  <CTA variant="dark" eyebrow="Reservations · 24/7" heading="Wheels up. Cars on the ramp." description="Twenty-four-hour live dispatch in 1,100+ cities. Speak with reservations." />
+</BaseLayout>

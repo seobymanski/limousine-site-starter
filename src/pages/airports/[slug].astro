@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AirportPageBody from '../../components/AirportPageBody.astro';
+import LocalBusinessSchema from '../../components/schemas/LocalBusinessSchema.astro';
+import BreadcrumbSchema from '../../components/schemas/BreadcrumbSchema.astro';
+import AirportSchema from '../../components/schemas/AirportSchema.astro';
+import {
+  fetchBlogPostBySlugAndCategory,
+  fetchBlogPostBySlugAndCategoryAnyStatus,
+} from '../../lib/payload';
+import { airportByCode } from '../../data/airports';
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+const isPreview = Astro.url.searchParams.get('preview') === '1';
+
+if (!slug) {
+  return Astro.redirect('/airports/');
+}
+
+const airport = airportByCode(slug);
+if (!airport) {
+  return new Response(null, { status: 404, statusText: 'Not Found' });
+}
+
+const post = isPreview
+  ? await fetchBlogPostBySlugAndCategoryAnyStatus(slug, 'airport-page').catch(() => null)
+  : await fetchBlogPostBySlugAndCategory(slug, 'airport-page').catch(() => null);
+
+if (!post) {
+  return new Response(null, { status: 404, statusText: 'Not Found' });
+}
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'FBOs', href: '/airports/' },
+  { label: airport.icao, href: `/airports/${slug}/` },
+];
+
+const title = post.metaTitle || `${airport.name} (${airport.icao}) Ground Transportation · [BRAND]`;
+const description = post.metaDescription || post.excerpt;
+---
+
+<BaseLayout title={title} description={description} ogImage={post.bannerImage || post.featuredImage}>
+  <LocalBusinessSchema slot="head" />
+  <BreadcrumbSchema slot="head" items={breadcrumbs} />
+  <AirportSchema
+    slot="head"
+    icao={airport.icao}
+    iata={airport.iata}
+    name={airport.name}
+    city={airport.city}
+    region={airport.region}
+  />
+
+  {isPreview && (
+    <div class="sticky top-0 z-50 bg-[color:var(--color-primary-500)] text-white text-center text-xs uppercase tracking-[0.18em] font-semibold py-2 px-4">
+      Preview mode — Status: {post.status} · this post is not live to the public yet
+    </div>
+  )}
+
+  <AirportPageBody post={post} airport={airport} />
+</BaseLayout>

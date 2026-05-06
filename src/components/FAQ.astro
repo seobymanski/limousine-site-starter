@@ -1,0 +1,147 @@
+---
+interface FAQItem {
+  question: string;
+  answer: string;
+}
+
+interface Props {
+  eyebrow?: string;
+  heading?: string;
+  description?: string;
+  faqs: FAQItem[];
+  /** When true, uses the section narrower / centered */
+  centered?: boolean;
+}
+
+const {
+  eyebrow = 'Frequently Asked',
+  heading = 'Questions, answered.',
+  description,
+  faqs,
+  centered = true,
+} = Astro.props;
+---
+
+<section class="bg-white py-24 lg:py-32">
+  <div class={`mx-auto px-6 lg:px-12 ${centered ? 'max-w-3xl' : 'max-w-[1400px]'}`}>
+    <div class="mb-12 lg:mb-16">
+      <p class="eyebrow mb-5">{eyebrow}</p>
+      <h2 class="section-heading font-display text-4xl leading-[1.08] tracking-tight text-neutral-900 sm:text-5xl">
+        {heading}
+      </h2>
+      {description && <p class="mt-4 text-lg text-neutral-600">{description}</p>}
+    </div>
+
+    <div class="border-t border-neutral-900/10">
+      {faqs.map((faq, i) => (
+        <details class="faq-item group border-b border-neutral-900/10" data-index={i}>
+          <summary
+            class="flex cursor-pointer list-none items-center justify-between gap-6 py-6 text-left transition-colors hover:text-neutral-900"
+            aria-expanded="false"
+          >
+            <h3 class="font-display text-xl tracking-tight text-neutral-900 sm:text-2xl">
+              {faq.question}
+            </h3>
+            <span class="faq-icon text-neutral-700 mt-2 shrink-0"></span>
+          </summary>
+          <div class="faq-answer pb-7 pr-12 text-base leading-relaxed text-neutral-600 max-w-prose">
+            {faq.answer}
+          </div>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  function initFAQ() {
+    const items = document.querySelectorAll<HTMLDetailsElement>('.faq-item');
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    items.forEach((item) => {
+      const summary = item.querySelector<HTMLElement>('summary');
+      const answer = item.querySelector<HTMLElement>('.faq-answer');
+      if (!summary || !answer) return;
+
+      summary.addEventListener('click', (e) => {
+        e.preventDefault();
+        const isOpen = item.open;
+
+        // Close other open items (single-open accordion)
+        items.forEach((other) => {
+          if (other !== item && other.open) {
+            const otherSummary = other.querySelector<HTMLElement>('summary');
+            const otherAnswer = other.querySelector<HTMLElement>('.faq-answer');
+            if (!otherAnswer || !otherSummary) return;
+            otherSummary.setAttribute('aria-expanded', 'false');
+            if (prefersReducedMotion) {
+              other.open = false;
+              otherAnswer.style.height = '';
+              otherAnswer.style.opacity = '';
+            } else {
+              const startH = otherAnswer.scrollHeight;
+              otherAnswer.style.height = startH + 'px';
+              otherAnswer.style.overflow = 'hidden';
+              requestAnimationFrame(() => {
+                otherAnswer.style.transition = 'height 0.35s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.2s ease';
+                otherAnswer.style.height = '0px';
+                otherAnswer.style.opacity = '0';
+              });
+              setTimeout(() => {
+                other.open = false;
+                otherAnswer.style.transition = '';
+                otherAnswer.style.height = '';
+                otherAnswer.style.opacity = '';
+                otherAnswer.style.overflow = '';
+              }, 360);
+            }
+          }
+        });
+
+        if (isOpen) {
+          summary.setAttribute('aria-expanded', 'false');
+          if (prefersReducedMotion) {
+            item.open = false;
+            return;
+          }
+          const startH = answer.scrollHeight;
+          answer.style.height = startH + 'px';
+          answer.style.overflow = 'hidden';
+          requestAnimationFrame(() => {
+            answer.style.transition = 'height 0.35s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.2s ease';
+            answer.style.height = '0px';
+            answer.style.opacity = '0';
+          });
+          setTimeout(() => {
+            item.open = false;
+            answer.style.transition = '';
+            answer.style.height = '';
+            answer.style.opacity = '';
+            answer.style.overflow = '';
+          }, 360);
+        } else {
+          summary.setAttribute('aria-expanded', 'true');
+          item.open = true;
+          if (prefersReducedMotion) return;
+          const targetH = answer.scrollHeight;
+          answer.style.height = '0px';
+          answer.style.opacity = '0';
+          answer.style.overflow = 'hidden';
+          requestAnimationFrame(() => {
+            answer.style.transition = 'height 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease 0.15s';
+            answer.style.height = targetH + 'px';
+            answer.style.opacity = '1';
+          });
+          setTimeout(() => {
+            answer.style.transition = '';
+            answer.style.height = '';
+            answer.style.overflow = '';
+          }, 450);
+        }
+      });
+    });
+  }
+
+  initFAQ();
+  document.addEventListener('astro:page-load', initFAQ);
+</script>

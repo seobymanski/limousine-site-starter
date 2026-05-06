@@ -1,0 +1,129 @@
+name: Deploy to Cloudflare
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  changes:
+    name: Detect changed paths
+    runs-on: ubuntu-latest
+    outputs:
+      astro: ${{ steps.filter.outputs.astro }}
+      cms: ${{ steps.filter.outputs.cms }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            astro:
+              - 'src/**'
+              - 'public/**'
+              - 'astro.config.mjs'
+              - 'package.json'
+              - 'tsconfig.json'
+              - 'wrangler.jsonc'
+            cms:
+              - 'cms/**'
+
+  preflight:
+    name: Preflight (template placeholders + secrets)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fail if template placeholders remain
+        run: |
+          set -e
+          fail=0
+          # Strings that must never reach a deploy. Each entry: "<pattern>|<file glob>"
+          checks=(
+            'REPLACE_WITH_|wrangler.jsonc cms/wrangler.jsonc'
+            '"name": "starter-cms"|cms/wrangler.jsonc'
+            '"name": "starter-site"|wrangler.jsonc'
+            'CLIENT-cms.workers.dev|wrangler.jsonc'
+            "site: 'https://example.com'|astro.config.mjs"
+          )
+          for entry in "${checks[@]}"; do
+            pattern="${entry%%|*}"
+            files="${entry##*|}"
+            for f in $files; do
+              if [ -f "$f" ] && grep -Fq "$pattern" "$f"; then
+                echo "::error file=$f::Template placeholder still present: '$pattern'. Replace it with the real value before deploying."
+                fail=1
+              fi
+            done
+          done
+          if [ "$fail" = "1" ]; then
+            echo ""
+            echo "Preflight failed. The repo contains starter-template placeholders that would cause Cloudflare to reject the deploy with a cryptic error. Fix the values above and push again."
+            exit 1
+          fi
+          echo "Preflight passed."
+      - name: Fail if CLOUDFLARE_API_TOKEN is missing
+        env:
+          HAS_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+          HAS_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
+        run: |
+          if [ "$HAS_TOKEN" != "true" ]; then
+            echo "::error::Repo secret CLOUDFLARE_API_TOKEN is empty or unset."
+            echo "Fix: gh secret set CLOUDFLARE_API_TOKEN --repo ${GITHUB_REPOSITORY}"
+            exit 1
+          fi
+          if [ "$HAS_ACCOUNT" != "true" ]; then
+            echo "::warning::CLOUDFLARE_ACCOUNT_ID is empty or unset. Wrangler will fall back to the account scope on the API token, which works for single-account tokens but is less explicit. Set it with: gh secret set CLOUDFLARE_ACCOUNT_ID"
+          fi
+
+  deploy-astro:
+    name: Deploy Astro site
+    needs: [changes, preflight]
+    if: needs.changes.outputs.astro == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build & deploy
+        run: pnpm run deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  deploy-cms:
+    name: Deploy CMS
+    needs: [changes, preflight]
+    if: needs.changes.outputs.cms == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./cms
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+          cache-dependency-path: cms/pnpm-lock.yaml
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Migrate D1 + deploy
+        run: pnpm run deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_ENV: ''

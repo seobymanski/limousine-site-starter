@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+cms/node_modules/
+
+# Build output
+dist/
+.astro/
+cms/.next/
+cms/.open-next/
+
+# Environment
+.env
+.env.local
+cms/.env
+cms/.env.local
+
+# Cloudflare
+.wrangler/
+cms/.wrangler/
+worker-configuration.d.ts
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.cursor/
+.idea/
+.claude/
+
+# Proposal (not part of the website)
+proposal.html
+
+# Old CMS backup
+cms-old/
+public/images/

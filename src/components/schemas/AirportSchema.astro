@@ -1,0 +1,50 @@
+---
+import { siteConfig } from '../../data/site-config';
+
+interface Props {
+  icao: string;
+  iata?: string;
+  name: string;
+  city: string;
+  region: string;
+}
+
+const { icao, iata, name, city, region } = Astro.props;
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Place',
+  '@id': `${siteConfig.url}/airports/${icao.toLowerCase()}/#place`,
+  name,
+  alternateName: iata ? [icao, iata] : [icao],
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: city,
+    addressRegion: region,
+  },
+  containedInPlace: {
+    '@type': 'AdministrativeArea',
+    name: region,
+  },
+  knowsAbout: 'Private aviation ground transportation',
+};
+
+const serviceSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: `Private Jet Ground Transportation at ${name}`,
+  serviceType: 'Ground Transportation',
+  areaServed: {
+    '@type': 'Place',
+    name: `${name} (${icao})`,
+  },
+  provider: {
+    '@type': 'Organization',
+    name: siteConfig.fullName,
+    url: siteConfig.url,
+  },
+};
+---
+
+<script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />
+<script is:inline type="application/ld+json" set:html={JSON.stringify(serviceSchema)} />

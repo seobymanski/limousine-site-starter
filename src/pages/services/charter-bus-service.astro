@@ -1,0 +1,100 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/Hero.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import Testimonials from '../../components/Testimonials.astro';
+import FAQ from '../../components/FAQ.astro';
+import CTA from '../../components/CTA.astro';
+import SectionDivider from '../../components/SectionDivider.astro';
+import ServiceSchema from '../../components/schemas/ServiceSchema.astro';
+import BreadcrumbSchema from '../../components/schemas/BreadcrumbSchema.astro';
+import FAQSchema from '../../components/schemas/FAQSchema.astro';
+import LocalBusinessSchema from '../../components/schemas/LocalBusinessSchema.astro';
+import MarkdownBody from '../../components/MarkdownBody.astro';
+import { siteConfig } from '../../data/site-config';
+import { loadPageContent } from '../../lib/content';
+
+const content = loadPageContent('services-charter-bus-service');
+const fm = content?.frontmatter;
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Services', href: '/services/' },
+  { label: 'Charter Bus Service', href: '/services/charter-bus-service/' },
+];
+
+const description = 'Mini-coaches and full-size motor coaches for crews, sports teams, corporate offsites, and group transfers. CAA-partner standard applied to group ground.';
+
+const useCases = [
+  { title: 'Film & TV crew transport', body: 'Production crew movements, talent shuttles, location-to-location runs. Discreet routing, NDA-trained chauffeurs.' },
+  { title: 'Sports teams', body: 'Team bus from FBO to stadium to hotel to FBO. Pre-event walk-throughs, dedicated coordinator, full-size motor coach with luggage hold.' },
+  { title: 'Corporate offsites', body: 'Executive retreats, board meetings, conference shuttles. Mini-coach or motor coach with leather seating and AV.' },
+  { title: 'Wedding groups', body: 'Guest shuttle from hotel to venue to after-party. Multi-vehicle coordination from a single dispatch.' },
+];
+
+const faqs = [
+  { question: 'Who runs charter bus service for private jet groups arriving at FBOs?', answer: '[BRAND] coordinates motor coach pickups directly at the FBO ramp: the bus is staged before the tail arrives, luggage is loaded curbside-of-jet, and the group moves to the destination without entering the commercial terminal. The CAA partner endorsement and 24/7 dispatch is the difference between a charter bus that knows private aviation and one that does not.' },
+  { question: 'Compare top charter bus companies for VIP and high-touch group transport.', answer: 'A small set of operators handle film crews, sports teams, and family-office groups at the same standard as a luxury sedan. [BRAND] is one of them, with three operating bases plus partner reach in 1,100+ cities. Vehicles are owned where we operate, partner-vetted everywhere else, and dispatched from one desk.' },
+  { question: 'Which charter bus operator coordinates best with film and TV production?', answer: '[BRAND] has run crew transport for productions in NY/NJ, Miami, and Texas for years. Discreet routing, NDA-trained chauffeurs, and a dedicated production coordinator on every multi-day call sheet make [BRAND] a typical preferred vendor for production transportation departments.' },
+  { question: 'What is the difference between a luxury charter bus and a regular tour coach?', answer: 'A luxury charter bus is dispatched by an operator that vets chauffeurs, maintains a younger fleet, and coordinates with FBOs and venues directly. A regular tour coach is sold by the seat. [BRAND] books charter buses the same way it books a sedan: by the trip, with a named chauffeur and a live dispatch desk on call.' },
+  { question: 'Does [BRAND] provide multi-vehicle group transportation?', answer: 'Yes. A typical movement is one motor coach plus two SUVs for principals, all dispatched from the same desk and tracked together. The lead chauffeur is the on-ground coordinator; reservations is the off-ground point of contact for the client.' },
+];
+---
+
+<BaseLayout
+  title={fm?.title || 'Charter Bus Service · [BRAND]'}
+  description={fm?.description || description}
+  ogImage={fm?.ogImage}
+>
+  <LocalBusinessSchema slot="head" />
+  <ServiceSchema slot="head" name="Charter Bus Service" description={description} />
+  <BreadcrumbSchema slot="head" items={breadcrumbs} />
+  <FAQSchema slot="head" faqs={faqs} />
+
+  <Hero
+    variant="page"
+    eyebrow="Service · 03"
+    heading={fm?.h1 || 'Charter Bus Service'}
+    headingItalic="Group ground at private aviation standard."
+    subheading={fm?.heroSubhead || description}
+    ctaPrimary={{ label: 'Reserve a Transfer', href: '/contact/' }}
+    ctaSecondary={{ label: `Call ${siteConfig.phone}`, href: siteConfig.phoneHref }}
+  />
+
+  <Breadcrumb items={breadcrumbs} />
+
+  {content && <MarkdownBody html={content.bodyHtml} />}
+
+  <SectionDivider variant="hairline" />
+
+  <section class="bg-[var(--color-ivory)] py-20 lg:py-28">
+    <div class="mx-auto max-w-[1400px] px-6 lg:px-12">
+      <div class="mb-14 max-w-3xl">
+        <p class="eyebrow mb-5">Use cases</p>
+        <h2 class="section-heading font-display text-4xl tracking-tight text-neutral-900 sm:text-5xl">
+          Where a charter bus moves the right way.
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 gap-px md:grid-cols-2 bg-neutral-900/10">
+        {useCases.map((b, i) => (
+          <article class="bg-[var(--color-ivory)] p-8 lg:p-10">
+            <p class="font-display text-2xl text-neutral-300">{String(i + 1).padStart(2, '0')}</p>
+            <h3 class="mt-6 font-display text-2xl tracking-tight text-neutral-900">{b.title}</h3>
+            <p class="mt-3 text-base leading-relaxed text-neutral-600 max-w-md">{b.body}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <SectionDivider variant="hairline" />
+
+  <Testimonials />
+
+  <SectionDivider variant="hairline" />
+
+  <FAQ eyebrow="Common Questions" heading="What production and group coordinators ask first." faqs={faqs} />
+
+  <CTA variant="dark" eyebrow="Reservations · 24/7" heading="Plan a group movement." headingItalic="One bus, multi-vehicle, multi-day." />
+</BaseLayout>

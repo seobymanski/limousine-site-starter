@@ -1,0 +1,82 @@
+---
+import { testimonials } from '../data/testimonials';
+
+interface Props {
+  eyebrow?: string;
+  heading?: string;
+}
+
+const {
+  eyebrow = 'Reviews',
+  heading = 'What clients say after the ride.',
+} = Astro.props;
+---
+
+<section class="relative bg-[var(--color-ivory)] py-24 lg:py-32">
+  <div class="mx-auto max-w-[1400px] px-6 lg:px-12">
+    <div class="mb-14 lg:mb-20 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-end">
+      <div class="lg:col-span-7">
+        <p class="eyebrow mb-5">{eyebrow}</p>
+        <h2 class="section-heading font-display text-4xl leading-[1.08] tracking-tight text-neutral-900 sm:text-5xl lg:text-6xl">
+          {heading}
+        </h2>
+      </div>
+      <div class="lg:col-span-5 flex items-center gap-2 text-sm uppercase tracking-[0.14em] text-neutral-600">
+        <span class="font-display text-2xl text-neutral-900 normal-case tracking-tight">5.0</span>
+        <span class="flex items-center gap-1 ml-2">
+          {Array.from({ length: 5 }).map(() => (
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" class="text-[var(--color-accent-500)]">
+              <path d="M7 0l1.6 4.9H14l-4.3 3.1L11.3 13 7 9.9 2.7 13l1.6-4.9L0 4.9h5.4z"/>
+            </svg>
+          ))}
+        </span>
+        <span class="ml-2 text-xs">on Google</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-px sm:grid-cols-2 lg:grid-cols-3 bg-neutral-900/10">
+      {testimonials.slice(0, 3).map((t) => (
+        <article class="relative bg-[var(--color-ivory)] p-8 lg:p-10 flex flex-col">
+          <div class="flex items-center gap-1 mb-6">
+            {Array.from({ length: t.rating }).map(() => (
+              <svg width="12" height="12" viewBox="0 0 14 14" fill="currentColor" class="text-[var(--color-accent-500)]">
+                <path d="M7 0l1.6 4.9H14l-4.3 3.1L11.3 13 7 9.9 2.7 13l1.6-4.9L0 4.9h5.4z"/>
+              </svg>
+            ))}
+          </div>
+          <blockquote class="font-display text-xl leading-snug text-neutral-900 italic flex-1">
+            &ldquo;{t.quote}&rdquo;
+          </blockquote>
+          <footer class="mt-8 pt-6 border-t border-neutral-900/10">
+            <span class="block h-px w-8 bg-[var(--color-accent-500)] mb-3"></span>
+            <p class="font-medium text-neutral-900">{t.name}</p>
+            {t.source && <p class="mt-1 text-xs uppercase tracking-[0.12em] text-neutral-500">via {t.source}</p>}
+          </footer>
+        </article>
+      ))}
+    </div>
+
+    <!-- Secondary row of testimonials, smaller -->
+    <div class="grid grid-cols-1 gap-px sm:grid-cols-2 mt-px bg-neutral-900/10">
+      {testimonials.slice(3, 5).map((t) => (
+        <article class="bg-[var(--color-ivory)] p-8 lg:p-10 flex flex-col">
+          <div class="flex items-center gap-1 mb-4">
+            {Array.from({ length: t.rating }).map(() => (
+              <svg width="11" height="11" viewBox="0 0 14 14" fill="currentColor" class="text-[var(--color-accent-500)]">
+                <path d="M7 0l1.6 4.9H14l-4.3 3.1L11.3 13 7 9.9 2.7 13l1.6-4.9L0 4.9h5.4z"/>
+              </svg>
+            ))}
+          </div>
+          <blockquote class="text-base leading-relaxed text-neutral-700 flex-1">
+            &ldquo;{t.quote}&rdquo;
+          </blockquote>
+          <footer class="mt-6 flex items-center gap-3 text-sm text-neutral-600">
+            <span class="block h-px w-6 bg-[var(--color-accent-500)]"></span>
+            <span class="font-medium text-neutral-900">{t.name}</span>
+            {t.source && <span class="text-xs uppercase tracking-[0.12em] text-neutral-500">via {t.source}</span>}
+          </footer>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

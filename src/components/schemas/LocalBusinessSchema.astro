@@ -1,0 +1,77 @@
+---
+import { siteConfig } from '../../data/site-config';
+
+interface Props {
+  city?: string;
+  state?: string;
+}
+
+const { city, state } = Astro.props;
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'LimousineService',
+  '@id': `${siteConfig.url}/#organization`,
+  name: siteConfig.fullName,
+  legalName: siteConfig.fullName,
+  url: siteConfig.url,
+  email: siteConfig.email,
+  telephone: siteConfig.phoneRaw,
+  description: siteConfig.description,
+  foundingDate: String(siteConfig.founded),
+  founder: {
+    '@type': 'Person',
+    name: siteConfig.founder,
+  },
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: siteConfig.address.street,
+    addressLocality: city || siteConfig.address.city,
+    addressRegion: state || siteConfig.address.state,
+    postalCode: siteConfig.address.zip,
+    addressCountry: siteConfig.address.country,
+  },
+  areaServed: siteConfig.cities.map((loc) => ({
+    '@type': 'City',
+    name: `${loc.city}, ${loc.state}`,
+  })),
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: 'Private Aviation Ground Transportation',
+    itemListElement: siteConfig.services.map((s) => ({
+      '@type': 'Offer',
+      itemOffered: {
+        '@type': 'Service',
+        name: s.name,
+        description: s.shortDescription,
+      },
+    })),
+  },
+  openingHoursSpecification: {
+    '@type': 'OpeningHoursSpecification',
+    dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    opens: '00:00',
+    closes: '23:59',
+  },
+  sameAs: [
+    siteConfig.social.facebook,
+    siteConfig.social.instagram,
+    siteConfig.social.linkedin,
+    siteConfig.social.google,
+  ].filter(Boolean),
+  branchOf: siteConfig.offices.map((office) => ({
+    '@type': 'Place',
+    name: `${office.label} · ${office.fbo}`,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: office.street,
+      addressLocality: office.city,
+      addressRegion: office.state,
+      postalCode: office.zip,
+      addressCountry: 'US',
+    },
+  })),
+};
+---
+
+<script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />

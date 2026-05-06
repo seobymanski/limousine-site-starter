@@ -1,0 +1,72 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/Hero.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import AirportCard from '../../components/AirportCard.astro';
+import CTA from '../../components/CTA.astro';
+import SectionDivider from '../../components/SectionDivider.astro';
+import LocalBusinessSchema from '../../components/schemas/LocalBusinessSchema.astro';
+import BreadcrumbSchema from '../../components/schemas/BreadcrumbSchema.astro';
+import { airports } from '../../data/airports';
+
+export const prerender = false;
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'FBOs', href: '/airports/' },
+];
+
+// Group airports by region
+const grouped = airports.reduce((acc, a) => {
+  (acc[a.region] = acc[a.region] || []).push(a);
+  return acc;
+}, {} as Record<string, typeof airports[number][]>);
+
+const regions = Object.keys(grouped);
+---
+
+<BaseLayout
+  title="FBO Ground Transportation Network · [BRAND]"
+  description="Direct ramp coordination at 29 major private aviation fields including Teterboro, Van Nuys, Opa-Locka, Aspen, and London Luton, with live tail tracking and round-the-clock dispatch."
+>
+  <LocalBusinessSchema slot="head" />
+  <BreadcrumbSchema slot="head" items={breadcrumbs} />
+
+  <Hero
+    variant="page"
+    eyebrow="FBO Network · 29 fields"
+    heading="Direct coordination at every"
+    headingItalic="major private aviation field."
+    subheading="Three home FBOs in NY/NJ, South Florida, and Texas, plus regular ramp work at twenty-six additional airports. Tail tracking, FBO coordinator on speed-dial, named chauffeurs."
+  />
+
+  <Breadcrumb items={breadcrumbs} />
+
+  <SectionDivider variant="hairline" />
+
+  <section class="bg-[var(--color-ivory)] py-20 lg:py-28">
+    <div class="mx-auto max-w-[1400px] px-6 lg:px-12 space-y-20">
+      {regions.map((region) => (
+        <div>
+          <div class="flex items-center gap-6 mb-8">
+            <p class="eyebrow shrink-0">{region}</p>
+            <div class="h-px flex-1 bg-neutral-900/15"></div>
+            <p class="text-xs text-neutral-500 uppercase tracking-[0.12em] shrink-0">{grouped[region].length} {grouped[region].length === 1 ? 'field' : 'fields'}</p>
+          </div>
+          <div class="grid grid-cols-2 gap-px sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 bg-neutral-900/10">
+            {grouped[region].map((a) => (
+              <AirportCard icao={a.icao} name={a.name} city={a.city} href={`/airports/${a.slug}/`} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <CTA
+    variant="dark"
+    eyebrow="Reservations · 24/7"
+    heading="Need ground at a field not listed?"
+    description="[BRAND] coordinates with vetted operators at every additional FBO in our 1,100+ city network. Reservations handles the source."
+  />
+</BaseLayout>

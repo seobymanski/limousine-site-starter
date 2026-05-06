@@ -1,0 +1,118 @@
+---
+import { siteConfig } from '../data/site-config';
+
+interface Props {
+  eyebrow?: string;
+  heading: string;
+  /** Optional italic line */
+  headingItalic?: string;
+  description?: string;
+  ctaPrimary?: { label: string; href: string };
+  ctaSecondary?: { label: string; href: string };
+  /** dark = black background ivory text. light = ivory bg dark text. */
+  variant?: 'dark' | 'light';
+}
+
+const {
+  eyebrow = 'Reservations',
+  heading = 'Wheels up. Cars on the ramp.',
+  headingItalic,
+  description = 'A live reservations specialist answers every call, twenty-four hours a day. Book your next FBO transfer or speak with the dispatch team.',
+  ctaPrimary = { label: 'Reserve a Transfer', href: '/contact/' },
+  ctaSecondary = { label: `Call ${siteConfig.phone}`, href: siteConfig.phoneHref },
+  variant = 'dark',
+} = Astro.props;
+---
+
+<section
+  class:list={[
+    'relative overflow-hidden py-24 lg:py-32',
+    variant === 'dark'
+      ? 'bg-neutral-900 text-[var(--color-ivory)]'
+      : 'bg-[var(--color-ivory)] text-neutral-900',
+  ]}
+>
+  <!-- Decorative serif backdrop word -->
+  <span
+    aria-hidden="true"
+    class:list={[
+      'pointer-events-none absolute -bottom-8 -right-12 select-none font-display text-[16rem] leading-none lg:text-[24rem]',
+      variant === 'dark' ? 'text-white/[0.04]' : 'text-neutral-900/[0.04]',
+    ]}
+  >
+    II
+  </span>
+
+  <div class="relative z-10 mx-auto max-w-[1400px] px-6 lg:px-12">
+    <div class="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:items-end">
+      <div class="lg:col-span-8">
+        {eyebrow && (
+          <p
+            class:list={[
+              'eyebrow mb-5',
+              variant === 'dark' ? 'text-[var(--color-accent-500)]' : 'text-neutral-700',
+            ]}
+          >
+            {eyebrow}
+          </p>
+        )}
+        <h2
+          class:list={[
+            'section-heading font-display text-4xl leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl',
+          ]}
+        >
+          {heading}
+          {headingItalic && (
+            <>
+              <br />
+              <span class:list={['italic font-normal', variant === 'dark' ? 'text-[var(--color-ivory)]/70' : 'text-neutral-600']}>
+                {headingItalic}
+              </span>
+            </>
+          )}
+        </h2>
+        {description && (
+          <p
+            class:list={[
+              'mt-6 max-w-xl text-base leading-relaxed sm:text-lg',
+              variant === 'dark' ? 'text-[var(--color-ivory)]/70' : 'text-neutral-600',
+            ]}
+          >
+            {description}
+          </p>
+        )}
+      </div>
+
+      <div class="lg:col-span-4 flex flex-col gap-4 lg:items-end">
+        {ctaPrimary && (
+          variant === 'dark' ? (
+            <a href={ctaPrimary.href} class="btn-ghost w-full justify-center sm:w-auto" style="background:var(--color-ivory);color:var(--color-primary-500);border-color:var(--color-ivory);">
+              {ctaPrimary.label}
+              <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
+                <path d="M1 5H13M13 5L9 1M13 5L9 9" stroke="currentColor" stroke-width="1" />
+              </svg>
+            </a>
+          ) : (
+            <a href={ctaPrimary.href} class="btn-primary">
+              {ctaPrimary.label}
+              <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
+                <path d="M1 5H13M13 5L9 1M13 5L9 9" stroke="currentColor" stroke-width="1" />
+              </svg>
+            </a>
+          )
+        )}
+        {ctaSecondary && (
+          <a
+            href={ctaSecondary.href}
+            class:list={[
+              'tracked-nav inline-flex items-center gap-2 transition-opacity hover:opacity-60',
+              variant === 'dark' ? 'text-[var(--color-ivory)]' : 'text-neutral-900',
+            ]}
+          >
+            {ctaSecondary.label}
+          </a>
+        )}
+      </div>
+    </div>
+  </div>
+</section>

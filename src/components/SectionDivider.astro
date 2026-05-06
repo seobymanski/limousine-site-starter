@@ -1,0 +1,40 @@
+---
+/**
+ * SectionDivider
+ * Sleek-minimal section transitions: 1px hairlines, eyebrow labels.
+ *
+ * variant="hairline" — full-width 1px line
+ * variant="centered" — short centered hairline (used between intros + content)
+ * variant="label"    — hairline + eyebrow label centered on the line
+ */
+
+interface Props {
+  variant?: 'hairline' | 'centered' | 'label';
+  label?: string;
+  className?: string;
+}
+
+const { variant = 'hairline', label, className = '' } = Astro.props;
+---
+
+{variant === 'hairline' && (
+  <div class={`relative w-full ${className}`}>
+    <div class="hairline"></div>
+  </div>
+)}
+
+{variant === 'centered' && (
+  <div class={`mx-auto w-full max-w-[1400px] px-6 py-2 lg:px-12 ${className}`}>
+    <div class="mx-auto h-px w-24 bg-neutral-900/20"></div>
+  </div>
+)}
+
+{variant === 'label' && (
+  <div class={`mx-auto w-full max-w-[1400px] px-6 lg:px-12 ${className}`}>
+    <div class="flex items-center gap-6">
+      <div class="h-px flex-1 bg-neutral-900/15"></div>
+      {label && <span class="eyebrow shrink-0 text-neutral-500">{label}</span>}
+      <div class="h-px flex-1 bg-neutral-900/15"></div>
+    </div>
+  </div>
+)}

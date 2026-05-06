@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Brand 3D wave">
+  <defs>
+    <!-- Deep background -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"  stop-color="#020202"/>
+      <stop offset="50%" stop-color="#0a0908"/>
+      <stop offset="100%" stop-color="#020202"/>
+    </linearGradient>
+
+    <!-- Primary glassy curve -->
+    <linearGradient id="curve1" x1="10%" y1="0%" x2="90%" y2="100%">
+      <stop offset="0%"  stop-color="#f0d9a8"/>
+      <stop offset="18%" stop-color="#c9a96e"/>
+      <stop offset="45%" stop-color="#5e4b30"/>
+      <stop offset="75%" stop-color="#191512"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </linearGradient>
+
+    <!-- Secondary curve, deeper tone -->
+    <linearGradient id="curve2" x1="0%" y1="20%" x2="100%" y2="80%">
+      <stop offset="0%"  stop-color="#3a2f1e"/>
+      <stop offset="40%" stop-color="#1a1410"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </linearGradient>
+
+    <!-- Specular highlight -->
+    <radialGradient id="spec" cx="38%" cy="22%" r="38%">
+      <stop offset="0%"  stop-color="rgba(255, 240, 215, 0.55)"/>
+      <stop offset="40%" stop-color="rgba(255, 230, 195, 0.18)"/>
+      <stop offset="100%" stop-color="rgba(255, 230, 195, 0)"/>
+    </radialGradient>
+
+    <!-- Secondary smaller highlight -->
+    <radialGradient id="spec2" cx="78%" cy="58%" r="22%">
+      <stop offset="0%"  stop-color="rgba(255, 235, 200, 0.32)"/>
+      <stop offset="100%" stop-color="rgba(255, 235, 200, 0)"/>
+    </radialGradient>
+
+    <!-- Edge sheen along the curve -->
+    <linearGradient id="sheen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"  stop-color="rgba(255,225,180,0.0)"/>
+      <stop offset="40%" stop-color="rgba(255,225,180,0.45)"/>
+      <stop offset="55%" stop-color="rgba(255,225,180,0.0)"/>
+    </linearGradient>
+
+    <!-- Soft blur for the rear curve (depth fake) -->
+    <filter id="softBlur" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+
+    <!-- Final vignette -->
+    <radialGradient id="vignette" cx="50%" cy="50%" r="78%">
+      <stop offset="55%" stop-color="rgba(0,0,0,0)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0.7)"/>
+    </radialGradient>
+
+    <clipPath id="clipBox">
+      <rect width="1200" height="900"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#clipBox)">
+    <!-- 1. Base -->
+    <rect width="1200" height="900" fill="url(#bg)"/>
+
+    <!-- 2. Rear (blurred) flowing shape — depth -->
+    <path
+      d="M 1200,80
+         C 980,140 820,300 880,470
+         C 940,640 760,790 540,820
+         L 1200,820 Z"
+      fill="url(#curve2)"
+      filter="url(#softBlur)"
+      opacity="0.85"/>
+
+    <!-- 3. Foreground glassy wave — main brand element -->
+    <path
+      d="M 1200,160
+         C 920,210 720,360 800,540
+         C 870,690 660,820 380,860
+         L 1200,860 Z"
+      fill="url(#curve1)"/>
+
+    <!-- 4. Sheen running across the wave -->
+    <path
+      d="M 1200,160
+         C 920,210 720,360 800,540
+         C 870,690 660,820 380,860
+         L 1200,860 Z"
+      fill="url(#sheen)"
+      opacity="0.6"/>
+
+    <!-- 5. Inner secondary curve (creates a fold) -->
+    <path
+      d="M 1200,360
+         C 1020,400 920,500 970,640
+         C 1000,720 920,800 800,830
+         L 1200,830 Z"
+      fill="url(#curve1)"
+      opacity="0.5"/>
+
+    <!-- 6. Specular highlights -->
+    <ellipse cx="540" cy="240" rx="320" ry="180" fill="url(#spec)"/>
+    <ellipse cx="950" cy="640" rx="170" ry="100" fill="url(#spec2)"/>
+
+    <!-- 7. Final vignette -->
+    <rect width="1200" height="900" fill="url(#vignette)"/>
+  </g>
+</svg>

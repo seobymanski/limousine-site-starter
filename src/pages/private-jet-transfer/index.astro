@@ -1,0 +1,77 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/Hero.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import LocationCard from '../../components/LocationCard.astro';
+import CTA from '../../components/CTA.astro';
+import SectionDivider from '../../components/SectionDivider.astro';
+import LocalBusinessSchema from '../../components/schemas/LocalBusinessSchema.astro';
+import BreadcrumbSchema from '../../components/schemas/BreadcrumbSchema.astro';
+import { siteConfig } from '../../data/site-config';
+
+export const prerender = false;
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Cities', href: '/private-jet-transfer/' },
+];
+
+// Group cities by region
+const grouped = siteConfig.cities.reduce((acc, c) => {
+  (acc[c.region] = acc[c.region] || []).push(c);
+  return acc;
+}, {} as Record<string, typeof siteConfig.cities[number][]>);
+
+const regions = Object.keys(grouped);
+---
+
+<BaseLayout
+  title="Private Jet Transfer Cities · [BRAND]"
+  description="Direct-to-FBO private jet ground transportation in 23 cities including New York, Miami, Aspen, Los Angeles, London, Paris, and Toronto. CAA-partner standard."
+>
+  <LocalBusinessSchema slot="head" />
+  <BreadcrumbSchema slot="head" items={breadcrumbs} />
+
+  <Hero
+    variant="page"
+    eyebrow="Cities · 23"
+    heading="Where we run on the ground."
+    headingItalic="From Aspen ski week to a Hamptons Friday."
+    subheading="Twenty-three cities with full local-led ground operations, plus partner-vetted reach in over 1,100 additional destinations worldwide."
+  />
+
+  <Breadcrumb items={breadcrumbs} />
+
+  <SectionDivider variant="hairline" />
+
+  <section class="bg-[var(--color-ivory)] py-20 lg:py-28">
+    <div class="mx-auto max-w-[1400px] px-6 lg:px-12 space-y-20">
+      {regions.map((region) => (
+        <div>
+          <div class="flex items-center gap-6 mb-8">
+            <p class="eyebrow shrink-0">{region}</p>
+            <div class="h-px flex-1 bg-neutral-900/15"></div>
+            <p class="text-xs text-neutral-500 uppercase tracking-[0.12em] shrink-0">{grouped[region].length} {grouped[region].length === 1 ? 'city' : 'cities'}</p>
+          </div>
+          <div class="grid grid-cols-1 gap-px sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 bg-neutral-900/10">
+            {grouped[region].map((c) => (
+              <LocationCard
+                city={c.city}
+                state={c.state}
+                detail={c.region}
+                href={`/private-jet-transfer/${c.slug}/`}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <CTA
+    variant="dark"
+    eyebrow="Reservations · 24/7"
+    heading="Need ground in a city not listed?"
+    description="[BRAND] partners with vetted operators in over 1,100 additional cities worldwide. Reservations sources a vehicle and chauffeur to the same standard."
+  />
+</BaseLayout>

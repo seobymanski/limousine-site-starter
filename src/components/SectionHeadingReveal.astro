@@ -1,0 +1,66 @@
+---
+/**
+ * Global script attached once per page — finds every `.section-heading`
+ * and applies the split-word reveal on scroll. Loaded from BaseLayout
+ * (or from individual pages) so we don't have to hand-roll the JS each
+ * time.
+ */
+---
+
+<script>
+  function initSectionReveals() {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const headings = document.querySelectorAll<HTMLElement>('.section-heading:not([data-revealed])');
+    if (!headings.length) return;
+
+    headings.forEach((h) => {
+      h.dataset.revealed = 'true';
+      // Skip if already prepared by Hero (heading already has reveal-word spans)
+      const hasWords = h.querySelector('.reveal-word');
+      if (!hasWords) {
+        // Simple fade-up for non-hero section headings
+        h.style.opacity = '0';
+        h.style.transform = 'translateY(16px)';
+        h.style.transition = prefersReducedMotion
+          ? 'none'
+          : 'opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1)';
+      }
+    });
+
+    if (prefersReducedMotion) {
+      headings.forEach((h) => {
+        h.style.opacity = '1';
+        h.style.transform = 'translateY(0)';
+        h.querySelectorAll<HTMLElement>('.reveal-word').forEach((w) => (w.style.transform = 'translateY(0)'));
+      });
+      return;
+    }
+
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const h = entry.target as HTMLElement;
+          const words = h.querySelectorAll<HTMLElement>('.reveal-word');
+          if (words.length) {
+            words.forEach((w, i) => {
+              w.style.transition = 'transform 0.85s cubic-bezier(0.22, 1, 0.36, 1)';
+              w.style.transitionDelay = `${i * 60}ms`;
+              w.style.transform = 'translateY(0)';
+            });
+          } else {
+            h.style.opacity = '1';
+            h.style.transform = 'translateY(0)';
+          }
+          obs.unobserve(h);
+        });
+      },
+      { threshold: 0.2, rootMargin: '0px 0px -10% 0px' }
+    );
+
+    headings.forEach((h) => obs.observe(h));
+  }
+
+  initSectionReveals();
+  document.addEventListener('astro:page-load', initSectionReveals);
+</script>

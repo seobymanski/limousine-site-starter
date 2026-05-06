@@ -1,0 +1,41 @@
+---
+interface BreadcrumbItem {
+  label: string;
+  href: string;
+}
+
+interface Props {
+  items: BreadcrumbItem[];
+  /** Light text variant for dark hero backgrounds */
+  light?: boolean;
+}
+
+const { items, light = false } = Astro.props;
+---
+
+<nav
+  aria-label="Breadcrumb"
+  class:list={[
+    'mx-auto max-w-[1400px] px-6 lg:px-12 pt-6',
+    light ? 'text-[var(--color-ivory)]/70' : 'text-neutral-600',
+  ]}
+>
+  <ol class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.12em]">
+    {items.map((item, i) => (
+      <li class="flex items-center gap-2">
+        {i < items.length - 1 ? (
+          <>
+            <a href={item.href} class="hover:opacity-60 transition-opacity">
+              {item.label}
+            </a>
+            <span aria-hidden="true" class="opacity-40">/</span>
+          </>
+        ) : (
+          <span aria-current="page" class:list={[light ? 'text-[var(--color-ivory)]' : 'text-neutral-900']}>
+            {item.label}
+          </span>
+        )}
+      </li>
+    ))}
+  </ol>
+</nav>
