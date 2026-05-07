@@ -53,16 +53,14 @@ export async function POST(req: Request) {
     // Without an API key we can't do the semantic check; fail open.
     if (!apiKey) return NextResponse.json({ duplicates: false })
 
-    // Scope to same category when one is provided, so newsletter prompts
-    // only compare against existing newsletters, building spotlights against
-    // building spotlights, etc. Cuts false positives and shrinks the context
-    // sent to Claude.
-    const where: Record<string, unknown> = { status: { equals: 'published' } }
-    if (category) where.category = { equals: category }
-
+    // Search across ALL categories — a duplicate topic in another category
+    // (e.g. an "events"-categorized post on the same subject) should still
+    // flag a new newsletter or building-spotlight prompt covering the same
+    // ground. The category-aware judgment is left to Claude in the prompt
+    // below.
     const posts = await payload.find({
       collection: 'blog-posts',
-      where,
+      where: { status: { equals: 'published' } },
       sort: '-publishedDate',
       limit: 100,
       depth: 0,
