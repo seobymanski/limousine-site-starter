@@ -35,3 +35,6 @@ proposal.html
 # Old CMS backup
 cms-old/
 public/images/
+
+# Per-client migration artifacts (Screaming Frog CSVs, asset dumps, post-mortems)
+migrations/
