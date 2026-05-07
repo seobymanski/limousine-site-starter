@@ -15,85 +15,63 @@ client.
 A migration without a proper inventory is an outage waiting to happen. Run
 this discovery phase **before** spinning up any new infrastructure.
 
-### 1. Crawl the existing site
+### 1. Crawl the existing site (Screaming Frog — required)
 
-**Screaming Frog SEO Spider is the default tool.** Use it for every
-migration unless the site is genuinely small (≤ 200 URLs) **and** has no
-meaningful SEO history to preserve. Free version covers up to 500 URLs;
-paid license needed for larger sites.
+**Every migration starts with a Screaming Frog crawl. No exceptions.**
 
-**Use Screaming Frog (required) when any of:**
+A migration without a proper crawl is a migration that loses pages,
+breaks redirects, drops assets, and bleeds rankings. SF is the only tool
+that catches all of those reliably. The free tier covers 500 URLs, which
+handles the typical chauffeur or service-business site; the paid license
+is needed for larger sites or when you need scheduled crawls / API
+access. **If you don't already have SF installed before starting a
+migration, install it before doing anything else.** Download:
+<https://www.screamingfrog.co.uk/seo-spider/>.
 
-- The site has > 200 URLs
-- The site has measurable organic rankings or traffic you don't want to
-  lose
-- The platform's sitemap is unreliable (Duda, Wix — both auto-generate
-  but routinely skip pages or include stale entries)
-- The site has a blog with multiple authors, paginated archives, or
-  category/tag pages
-- Migration involves redirects from non-trivial inbound links (Google
-  Ads landing pages, printed collateral, partner backlinks)
+#### What to export
 
-**Sitemap-only fallback is acceptable when all of:**
+Run the crawl against the live old site, then export each of these to
+CSV:
 
-- ≤ 200 URLs
-- No SEO history worth preserving
-- Modern platform with a known-good sitemap (Astro / Next.js / WordPress
-  + Yoast — these tend to produce accurate sitemaps)
-
-#### What to export from Screaming Frog
-
-- **Internal:All URLs** → CSV. This is your old-URL → new-URL mapping
-  source of truth.
-- **Internal:All Images** → CSV. Inventory of every image on the live
-  site so nothing gets dropped.
-- **Page Titles + Meta Descriptions** → CSV. Preserves the SEO state you
-  paid to optimize.
-- **Inlinks for every page** → CSV. Tells you which pages will need
-  redirects (any URL that gets non-trivial inbound link counts).
-- **Response Codes** → check for 4xx / 5xx pages. Don't migrate broken
-  pages forward.
-- **Hreflang / canonical tags** → record. The new site needs to honor
-  whatever canonical strategy was in place.
+- **Internal:All URLs** → the old-URL → new-URL mapping source of truth.
+- **Internal:All Images** → every image on the live site, used for the
+  R2 asset upload.
+- **Page Titles + Meta Descriptions** → preserves the SEO state the
+  client paid to optimize.
+- **Inlinks for every page** → which pages link where; tells you which
+  URLs are redirect priorities (anything with double-digit inbound link
+  counts).
+- **Response Codes** → identifies 4xx / 5xx pages so you don't migrate
+  broken URLs forward.
+- **Hreflang / canonical tags** → the new site has to honor whatever
+  canonical strategy was in place.
 - **Redirect chains** → SF identifies multi-hop chains. Collapse them in
   the new site (one 301, never a chain).
 - **Sitemap.xml** → save a copy.
 
-Save all CSVs in a `migrations/<client-slug>/` folder (gitignored — they
-can be large and contain client-sensitive paths).
+Save all CSVs to `migrations/<client-slug>/` (gitignored — they can be
+large and contain client-sensitive paths).
 
-#### Sitemap fallback (when SF is genuinely not justified)
+#### Why no fallback
 
-For tiny static sites that don't meet the SF threshold above, ask Claude
-to do a sitemap-driven URL inventory:
+Earlier drafts of this runbook described a "sitemap-only fallback" for
+tiny sites. That fallback is removed because it silently misses things
+that matter even on small sites:
 
-```
-1. curl https://<old-site>/sitemap.xml
-2. parse all <loc> entries
-3. for each URL, fetch + record HTTP status, title, meta description, h1
-4. output a CSV in the shape Screaming Frog's "Internal:All" produces
-```
-
-**Limitations of this fallback that you must accept:**
-
-- **Orphan pages are invisible.** Pages not listed in the sitemap (often
-  the case for older posts, hidden landing pages, abandoned content)
-  won't be in the inventory. They'll 404 after migration with no
-  redirect.
-- **Redirect chains aren't traced.** Only the final URL of any
-  pre-existing redirect is recorded. Existing redirect logic can be
+- **Orphan pages** the sitemap doesn't list (often the case for older
+  posts, hidden landing pages, abandoned content) — these 404 after
+  migration with no redirect, and any inbound link to them dies.
+- **Existing redirect chains** — the sitemap shows the final destination
+  but not the redirects pointing at it; pre-existing redirect logic gets
   silently lost.
-- **Asset inventory has to be built separately.** The fallback only
-  enumerates pages, not images / PDFs / CSS background images.
-- **Inlink count per page is not computed.** You won't know which pages
-  carry the most inbound link equity, so you can't prioritize redirects.
-- **Broken internal links go undetected.** SF crawls every link; the
-  fallback only fetches what's in the sitemap.
+- **Asset inventory** for images, PDFs, and CSS background images — the
+  sitemap doesn't enumerate these, and missing one breaks a page after
+  the old host's CDN expires.
+- **Inlink counts** that tell you which redirects are highest priority.
+- **Broken internal links** that SF surfaces but the sitemap can't.
 
-If any of those limitations sound like they'd matter for the client at
-hand, **use Screaming Frog instead.** The fallback exists for cases
-where the site is genuinely a known small inventory (a 12-page brochure
-site, for example) and the trade-offs above don't apply.
+A 50-URL site with strong rankings is just as fragile to a bad crawl as
+a 1,000-URL site. Don't rely on the sitemap. Run SF.
 
 ### 2. Asset inventory
 
