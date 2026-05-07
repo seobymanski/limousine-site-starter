@@ -17,11 +17,31 @@ this discovery phase **before** spinning up any new infrastructure.
 
 ### 1. Crawl the existing site
 
-**Tool of choice: Screaming Frog SEO Spider.** Free version covers up to
-500 URLs which is enough for the typical chauffeur or service-business
-site. Paid license needed for larger sites.
+**Screaming Frog SEO Spider is the default tool.** Use it for every
+migration unless the site is genuinely small (≤ 200 URLs) **and** has no
+meaningful SEO history to preserve. Free version covers up to 500 URLs;
+paid license needed for larger sites.
 
-What to export:
+**Use Screaming Frog (required) when any of:**
+
+- The site has > 200 URLs
+- The site has measurable organic rankings or traffic you don't want to
+  lose
+- The platform's sitemap is unreliable (Duda, Wix — both auto-generate
+  but routinely skip pages or include stale entries)
+- The site has a blog with multiple authors, paginated archives, or
+  category/tag pages
+- Migration involves redirects from non-trivial inbound links (Google
+  Ads landing pages, printed collateral, partner backlinks)
+
+**Sitemap-only fallback is acceptable when all of:**
+
+- ≤ 200 URLs
+- No SEO history worth preserving
+- Modern platform with a known-good sitemap (Astro / Next.js / WordPress
+  + Yoast — these tend to produce accurate sitemaps)
+
+#### What to export from Screaming Frog
 
 - **Internal:All URLs** → CSV. This is your old-URL → new-URL mapping
   source of truth.
@@ -35,23 +55,45 @@ What to export:
   pages forward.
 - **Hreflang / canonical tags** → record. The new site needs to honor
   whatever canonical strategy was in place.
-- **Sitemap** → save a copy.
+- **Redirect chains** → SF identifies multi-hop chains. Collapse them in
+  the new site (one 301, never a chain).
+- **Sitemap.xml** → save a copy.
 
 Save all CSVs in a `migrations/<client-slug>/` folder (gitignored — they
 can be large and contain client-sensitive paths).
 
-If you don't have Screaming Frog access for a particular site, ask Claude
-to do a fallback URL extraction:
+#### Sitemap fallback (when SF is genuinely not justified)
+
+For tiny static sites that don't meet the SF threshold above, ask Claude
+to do a sitemap-driven URL inventory:
 
 ```
 1. curl https://<old-site>/sitemap.xml
 2. parse all <loc> entries
 3. for each URL, fetch + record HTTP status, title, meta description, h1
-4. output a CSV in the same shape as Screaming Frog's "Internal:All"
+4. output a CSV in the shape Screaming Frog's "Internal:All" produces
 ```
 
-This is good enough for sites under 200 URLs. For anything bigger or any
-site without a sitemap, use Screaming Frog.
+**Limitations of this fallback that you must accept:**
+
+- **Orphan pages are invisible.** Pages not listed in the sitemap (often
+  the case for older posts, hidden landing pages, abandoned content)
+  won't be in the inventory. They'll 404 after migration with no
+  redirect.
+- **Redirect chains aren't traced.** Only the final URL of any
+  pre-existing redirect is recorded. Existing redirect logic can be
+  silently lost.
+- **Asset inventory has to be built separately.** The fallback only
+  enumerates pages, not images / PDFs / CSS background images.
+- **Inlink count per page is not computed.** You won't know which pages
+  carry the most inbound link equity, so you can't prioritize redirects.
+- **Broken internal links go undetected.** SF crawls every link; the
+  fallback only fetches what's in the sitemap.
+
+If any of those limitations sound like they'd matter for the client at
+hand, **use Screaming Frog instead.** The fallback exists for cases
+where the site is genuinely a known small inventory (a 12-page brochure
+site, for example) and the trade-offs above don't apply.
 
 ### 2. Asset inventory
 
