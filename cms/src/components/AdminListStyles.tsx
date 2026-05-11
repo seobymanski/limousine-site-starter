@@ -322,27 +322,32 @@ thead th.cell-_select * {
   transform: translateY(-2px);
 }
 
-/* Force the sub-header (which holds the search bar + bulk-actions
-   toolbar) to wrap so the toolbar can fall onto its own row when it
-   appears, rather than crowding the search bar or column headers. */
+/* Every plausible parent of .list-selection — Payload v3 has moved
+   this element between containers across point releases, so cover all
+   the candidates. */
 .collection-list__sub-header,
-.list-controls {
+.collection-list__header,
+.list-controls,
+.list-controls__search,
+.list-controls__buttons,
+.list-header,
+.list-header__heading {
   flex-wrap: wrap !important;
   row-gap: 18px !important;
 }
 
-/* Bulk-actions toolbar (1 selected — Select all — Edit — Delete)
-   gets its own full-width row above the column headers. */
+/* Bulk-actions toolbar (1 selected — Select all — Edit — Delete) sits
+   on its own row, regardless of which parent Payload puts it into. */
 .list-selection {
   display: flex !important;
   width: 100% !important;
+  flex: 0 0 100% !important;
   flex-basis: 100% !important;
-  margin-top: 12px !important;
-  margin-bottom: 12px !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
+  margin: 12px 0 !important;
   padding: 8px 0 !important;
   order: 10 !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
 }
 
 /* Push the table down from the sub-header (which now grows when the
