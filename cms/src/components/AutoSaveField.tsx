@@ -68,11 +68,33 @@ const AutoSaveField: React.FC = () => {
     form.addEventListener('input', onChange, true)
     form.addEventListener('change', onChange, true)
 
+    // Also watch for DOM mutations inside the form. Image uploads and
+    // other relationship fields update React state without firing
+    // native input/change events — but the DOM mutates visibly.
+    const mutationObserver = new MutationObserver((records) => {
+      const meaningful = records.some((r) => {
+        const t = r.target as HTMLElement
+        if (!t) return false
+        if (t.closest && (t.closest('[class*="mh-as-"]') || t.closest('.mh-autosave-indicator'))) {
+          return false
+        }
+        return true
+      })
+      if (meaningful) onChange()
+    })
+    mutationObserver.observe(form, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['value', 'src', 'data-id', 'data-value'],
+    })
+
     return () => {
       clearTimeout(armTimer)
       if (timerRef.current) clearTimeout(timerRef.current)
       form.removeEventListener('input', onChange, true)
       form.removeEventListener('change', onChange, true)
+      mutationObserver.disconnect()
       document.body.classList.remove('mh-autosave-active')
     }
   }, [])
