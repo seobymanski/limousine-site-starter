@@ -27,6 +27,15 @@ export const LLMTargetPrompts: CollectionConfig = {
   },
   fields: [
     {
+      name: 'autoSave',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/AutoSaveField#default',
+        },
+      },
+    },
+    {
       name: 'prompt',
       type: 'textarea',
       required: true,

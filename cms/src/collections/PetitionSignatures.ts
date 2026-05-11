@@ -23,6 +23,15 @@ export const PetitionSignatures: CollectionConfig = {
   },
   fields: [
     {
+      name: 'autoSave',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/AutoSaveField#default',
+        },
+      },
+    },
+    {
       name: 'postSlug',
       type: 'text',
       required: true,

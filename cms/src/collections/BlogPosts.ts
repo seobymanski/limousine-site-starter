@@ -82,6 +82,15 @@ export const BlogPosts: CollectionConfig = {
   },
   fields: [
     {
+      name: 'autoSave',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/AutoSaveField#default',
+        },
+      },
+    },
+    {
       name: 'aiGenerator',
       type: 'ui',
       admin: {

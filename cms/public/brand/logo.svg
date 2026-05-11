@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 200" role="img" aria-label="Brand logo placeholder">
+  <rect width="600" height="200" fill="#0a0a0a"/>
+  <rect x="14" y="14" width="572" height="172" fill="none" stroke="#fafaf6" stroke-width="2"/>
+  <rect x="22" y="22" width="556" height="156" fill="none" stroke="#fafaf6" stroke-width="1"/>
+  <text x="300" y="92" font-family="Georgia, 'Times New Roman', serif" font-size="58" font-weight="600" fill="#fafaf6" text-anchor="middle" letter-spacing="0.04em">YOUR BRAND</text>
+  <line x1="120" y1="115" x2="480" y2="115" stroke="#c9a96e" stroke-width="1"/>
+  <text x="300" y="155" font-family="Georgia, 'Times New Roman', serif" font-size="22" fill="#fafaf6" text-anchor="middle" letter-spacing="0.32em">LOGO PLACEHOLDER</text>
+</svg>

@@ -29,7 +29,25 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const realpath = (value: string) => (fs.existsSync(value) ? fs.realpathSync(value) : undefined)
 
-const isCLI = process.argv.some((value) => realpath(value)?.endsWith(path.join('payload', 'bin.js')))
+// Treat both Payload's own CLI (payload/bin.js) and any local Node script under
+// cms/scripts/ as CLI invocations — they run outside a Cloudflare Worker, so
+// they need wrangler's PlatformProxy for bindings rather than
+// @opennextjs/cloudflare's runtime context.
+const isCLI = process.argv.some((value) => {
+  const resolved = realpath(value)
+  return Boolean(
+    resolved?.endsWith(path.join('payload', 'bin.js')) ||
+      resolved?.includes(path.join('cms', 'scripts')),
+  )
+})
+
+// `payload generate:importmap` walks the full collection + plugin graph to
+// register every component path. If we strip plugins (like r2Storage) when
+// isCLI=true, the regen drops their imports — and the deployed Worker then
+// fails to mount the admin because R2ClientUploadHandler can't be resolved.
+// importmap gen is metadata-only (no R2 writes), so it's safe to load
+// r2Storage during it. Detect that command specifically.
+const isImportMapGen = process.argv.includes('generate:importmap')
 const isProduction = process.env.NODE_ENV === 'production'
 
 const createLog =
@@ -67,14 +85,23 @@ export default buildConfig({
       titleSuffix: ' · [BRAND] CMS',
       description: 'Content management for the [BRAND] site.',
     },
+    avatar: {
+      Component: '@/components/UserAvatar#default',
+    },
     components: {
       graphics: {
         Logo: '@/components/AdminLogo#default',
         Icon: '@/components/AdminIcon#default',
       },
-      beforeNavLinks: ['@/components/NavLogo#default', '@/components/AdminListStyles#default'],
-      beforeDashboard: ['@/components/DashboardHeader#default'],
-      afterNavLinks: ['@/components/AnalyticsNavLinks#default'],
+      beforeNavLinks: ['@/components/NavLogo#default'],
+      beforeDashboard: [
+        '@/components/DashboardHeader#default',
+        '@/components/DashboardCards#default',
+      ],
+      afterNavLinks: [
+        '@/components/AnalyticsNavLinks#default',
+        '@/components/AdminListStyles#default',
+      ],
     },
   },
   collections: [
@@ -109,12 +136,20 @@ export default buildConfig({
     'http://localhost:4321',
     'http://localhost:3000',
   ],
-  plugins: [
-    r2Storage({
-      bucket: cloudflare.env.R2,
-      collections: { media: true },
-    }),
-  ],
+  // r2Storage attaches lifecycle hooks to the media collection that assert
+  // a Worker-style R2 binding shape. Those assertions throw when running
+  // local CLI scripts (e.g. cms/scripts/migrate-content.ts) even on
+  // metadata-only creates, so we skip the plugin in CLI mode. importmap
+  // regen is special-cased: we DO load r2Storage there so the deployed
+  // Worker keeps its R2ClientUploadHandler imports in the generated map.
+  plugins: isCLI && !isImportMapGen
+    ? []
+    : [
+        r2Storage({
+          bucket: cloudflare.env.R2,
+          collections: { media: true },
+        }),
+      ],
 })
 
 function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {

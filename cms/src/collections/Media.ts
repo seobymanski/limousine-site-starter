@@ -10,6 +10,15 @@ export const Media: CollectionConfig = {
   },
   fields: [
     {
+      name: 'autoSave',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/AutoSaveField#default',
+        },
+      },
+    },
+    {
       name: 'alt',
       type: 'text',
       required: true,

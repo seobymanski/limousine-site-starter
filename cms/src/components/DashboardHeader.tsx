@@ -2,6 +2,16 @@
 import React from 'react'
 import Link from 'next/link'
 
+/**
+ * Gradient header above the dashboard cards. The starter ships with
+ * dark ink + gold accent, so the gradient runs from ink to a slightly
+ * lifted ink and the buttons swap to a gold "New Content" CTA and a
+ * subtle outline "View Live Site" link.
+ *
+ * Update the live-site URL when configuring a new client — the
+ * starter's CORS list still uses https://example.com as the
+ * placeholder, so we mirror that here.
+ */
 const DashboardHeader: React.FC = () => {
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
@@ -9,83 +19,93 @@ const DashboardHeader: React.FC = () => {
   return (
     <div
       style={{
-        background: 'linear-gradient(135deg, #111 0%, #1a1a1a 100%)',
-        borderRadius: 12,
-        padding: '32px 36px',
-        marginBottom: 32,
+        background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)',
+        borderRadius: 8,
+        padding: '8px 16px',
+        marginBottom: 10,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
-        gap: 16,
+        gap: 12,
       }}
     >
       <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-          <div
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 8,
-              background: '#fff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 700,
-              fontSize: 16,
-              color: '#111',
-              letterSpacing: '0.05em',
-              fontFamily: '"Cormorant Garamond", "Garamond", serif',
-            }}
-          >
-            II
-          </div>
-          <h2
-            style={{
-              margin: 0,
-              fontSize: 24,
-              fontWeight: 900,
-              color: '#fff',
-              fontFamily: 'system-ui, sans-serif',
-              letterSpacing: '-0.3px',
-            }}
-          >
-            {greeting}
-          </h2>
-        </div>
+        <h2
+          style={{
+            margin: '0 0 1px',
+            fontSize: 16,
+            fontWeight: 900,
+            color: '#ffffff',
+            fontFamily: 'system-ui, sans-serif',
+            letterSpacing: '-0.2px',
+          }}
+        >
+          {greeting}
+        </h2>
         <p
           style={{
             margin: 0,
-            fontSize: 14,
-            color: 'rgba(255,255,255,0.6)',
+            fontSize: 11,
+            color: 'rgba(255, 255, 255, 0.7)',
             fontFamily: 'system-ui, sans-serif',
-            paddingLeft: 52,
           }}
         >
           Manage city pages, FBO/airport pages, blog posts, and contact submissions.
         </p>
       </div>
-      <Link
-        href="/admin/collections/blog-posts/create"
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 8,
-          background: '#fff',
-          color: '#111',
-          fontWeight: 700,
-          fontSize: 12,
-          padding: '10px 20px',
-          borderRadius: 8,
-          textDecoration: 'none',
-          textTransform: 'uppercase',
-          letterSpacing: '0.08em',
-          fontFamily: '"Cormorant Garamond", "Garamond", serif',
-          whiteSpace: 'nowrap',
-        }}
-      >
-        + New Content
-      </Link>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <Link
+          href="/admin/collections/blog-posts/create"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            background: '#FFC700',
+            color: '#111',
+            fontWeight: 800,
+            fontSize: 11,
+            padding: '7px 14px',
+            borderRadius: 6,
+            textDecoration: 'none',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            fontFamily: 'system-ui, sans-serif',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          + New Content
+        </Link>
+        <a
+          href="https://example.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            background: 'transparent',
+            color: '#ffffff',
+            fontWeight: 700,
+            fontSize: 11,
+            padding: '6px 12px',
+            borderRadius: 6,
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            textDecoration: 'none',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            fontFamily: 'system-ui, sans-serif',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          View Live Site
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+            <polyline points="15 3 21 3 21 9" />
+            <line x1="10" y1="14" x2="21" y2="3" />
+          </svg>
+        </a>
+      </div>
     </div>
   )
 }

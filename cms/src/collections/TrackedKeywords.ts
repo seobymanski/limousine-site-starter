@@ -27,6 +27,15 @@ export const TrackedKeywords: CollectionConfig = {
   },
   fields: [
     {
+      name: 'autoSave',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/AutoSaveField#default',
+        },
+      },
+    },
+    {
       name: 'keyword',
       type: 'text',
       required: true,

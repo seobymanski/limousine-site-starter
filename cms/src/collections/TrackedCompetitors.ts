@@ -25,6 +25,15 @@ export const TrackedCompetitors: CollectionConfig = {
   },
   fields: [
     {
+      name: 'autoSave',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/AutoSaveField#default',
+        },
+      },
+    },
+    {
       name: 'domain',
       type: 'text',
       required: true,

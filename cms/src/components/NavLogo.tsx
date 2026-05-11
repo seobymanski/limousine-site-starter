@@ -1,50 +1,48 @@
 'use client'
 import React from 'react'
+import Link from 'next/link'
 
+/**
+ * Wordmark at the top of the admin sidebar. The starter sidebar is
+ * dark ink (#111), so we use `mix-blend-mode: screen` to blend out
+ * any near-black pixels in the source logo without us having to
+ * regenerate the asset.
+ *
+ * Per-client: drop a new `public/brand/logo.svg` (or .png) and the
+ * sidebar picks it up automatically. The placeholder ships with the
+ * starter and renders a "YOUR BRAND" wordmark.
+ */
 const NavLogo: React.FC = () => (
   <div
     style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: 10,
-      padding: '20px 16px 16px',
-      borderBottom: '1px solid rgba(255,255,255,0.1)',
+      padding: '20px 18px 14px',
+      borderBottom: '1px solid #1e1e1e',
       marginBottom: 8,
+      display: 'flex',
+      justifyContent: 'center',
     }}
   >
-    <div
+    <Link
+      href="/admin"
+      aria-label="Back to dashboard"
       style={{
-        width: 32,
-        height: 32,
-        borderRadius: 6,
-        background: '#fff',
-        color: '#111',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontWeight: 700,
-        fontSize: 13,
-        letterSpacing: '0.05em',
-        fontFamily: '"Cormorant Garamond", "Garamond", serif',
-        flexShrink: 0,
+        display: 'block',
+        textDecoration: 'none',
       }}
     >
-      II
-    </div>
-    <div style={{ lineHeight: 1.2 }}>
-      <div
+      <img
+        src="/brand/logo.svg"
+        alt="Brand"
+        width={170}
+        height={60}
         style={{
-          fontWeight: 700,
-          fontSize: 13,
-          color: '#fff',
-          letterSpacing: '0.04em',
-          fontFamily: '"Cormorant Garamond", "Garamond", serif',
-          textTransform: 'uppercase',
+          display: 'block',
+          width: 170,
+          height: 'auto',
+          mixBlendMode: 'screen',
         }}
-      >
-        [BRAND]
-      </div>
-    </div>
+      />
+    </Link>
   </div>
 )
 

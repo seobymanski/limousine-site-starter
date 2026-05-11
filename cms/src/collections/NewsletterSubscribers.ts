@@ -32,6 +32,15 @@ export const NewsletterSubscribers: CollectionConfig = {
   },
   fields: [
     {
+      name: 'autoSave',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/AutoSaveField#default',
+        },
+      },
+    },
+    {
       name: 'email',
       type: 'email',
       required: true,

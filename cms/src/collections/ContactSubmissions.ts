@@ -26,6 +26,15 @@ export const ContactSubmissions: CollectionConfig = {
     description: 'Messages sent through the public contact form.',
   },
   fields: [
+    {
+      name: 'autoSave',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/AutoSaveField#default',
+        },
+      },
+    },
     { name: 'name', type: 'text', required: true },
     { name: 'email', type: 'email', required: true, index: true },
     { name: 'phone', type: 'text' },
