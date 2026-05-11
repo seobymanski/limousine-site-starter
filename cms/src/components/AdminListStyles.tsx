@@ -54,6 +54,13 @@ body.mh-autosave-active button#action-save {
   display: none !important;
 }
 
+/* …but inside drawers (e.g. Media create from a blog-post Hero Image
+   field), KEEP the Save button so uploads can be committed. */
+body.mh-autosave-active .drawer #action-save,
+body.mh-autosave-active .drawer button#action-save {
+  display: inline-flex !important;
+}
+
 /* ------------------------------------------------------------------ */
 /* Primary CTAs in brand gold                                          */
 /* ------------------------------------------------------------------ */
@@ -488,6 +495,21 @@ label.field-type__label {
   border-color: #e8e8e2 !important;
   border-radius: 8px !important;
   min-height: 40px !important;
+}
+
+/* React-select's internal search input — reset so the value isn't
+   shoved past the visible left edge by the chip padding. */
+.rs__input,
+.rs__input-container,
+.field-type__wrap .rs__input,
+.field-type__wrap .rs__input-container {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  color: #FFC700 !important;
+  font-weight: 600 !important;
 }
 
 .rs__single-value,
