@@ -229,6 +229,16 @@ html[data-theme='light'] .nav-group__toggle:hover {
 }
 
 /* ------------------------------------------------------------------ */
+/* Hide the bulk-Edit button on the list-selection toolbar. It opens a
+   drawer that OVERWRITES the chosen field across every selected row
+   with no preview of current values — too dangerous for editorial
+   content. Bulk Delete stays; per-row edits happen by clicking the
+   row's title as normal. */
+.list-selection .edit-many,
+.list-selection .edit-many__toggle {
+  display: none !important;
+}
+
 /* Status pills (Published / Draft) fully rounded                      */
 /* ------------------------------------------------------------------ */
 .pill {
