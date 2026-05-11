@@ -29,6 +29,8 @@ const AutoSaveField: React.FC = () => {
   const armedRef = useRef(false)
 
   useEffect(() => {
+    document.body.classList.add('mh-autosave-active')
+
     const armTimer = setTimeout(() => {
       armedRef.current = true
     }, 1000)
@@ -37,7 +39,10 @@ const AutoSaveField: React.FC = () => {
       'form[method="POST"], form.collection-edit, form.global-edit, main form',
     )
     if (!form) {
-      return () => clearTimeout(armTimer)
+      return () => {
+        clearTimeout(armTimer)
+        document.body.classList.remove('mh-autosave-active')
+      }
     }
 
     const onChange = () => {
@@ -68,6 +73,7 @@ const AutoSaveField: React.FC = () => {
       if (timerRef.current) clearTimeout(timerRef.current)
       form.removeEventListener('input', onChange, true)
       form.removeEventListener('change', onChange, true)
+      document.body.classList.remove('mh-autosave-active')
     }
   }, [])
 

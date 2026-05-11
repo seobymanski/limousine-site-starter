@@ -49,8 +49,8 @@ const css = `
    every editable collection. Hide it (Payload renders it as id
    "action-save") but keep it in the DOM so the autosave field can
    still click it programmatically. */
-#action-save,
-button#action-save {
+body.mh-autosave-active #action-save,
+body.mh-autosave-active button#action-save {
   display: none !important;
 }
 
