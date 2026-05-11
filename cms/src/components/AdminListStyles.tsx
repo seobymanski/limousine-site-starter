@@ -438,22 +438,22 @@ label.field-type__label {
 /* Short inputs — chip-style: warm-paper bg, taupe border, ink-black
    text with a bold weight so the value reads as a pressable token.
    Mirrors the sidebar nav chip on a light surface. */
-.field-type input[type='text'],
-.field-type input[type='email'],
-.field-type input[type='number'],
-.field-type input[type='url'],
-.field-type input[type='tel'],
-.field-type input[type='password'],
-.field-type input[type='search'],
-.field-type input[type='date'],
-.field-type__wrap input[type='text'],
-.field-type__wrap input[type='email'],
-.field-type__wrap input[type='number'],
-.field-type__wrap input[type='url'],
-.field-type__wrap input[type='tel'],
-.field-type__wrap input[type='password'],
-.field-type__wrap input[type='search'],
-.field-type__wrap input[type='date'] {
+.field-type input[type='text']:not(.rs__input):not([class*='rs__']),
+.field-type input[type='email']:not(.rs__input):not([class*='rs__']),
+.field-type input[type='number']:not(.rs__input):not([class*='rs__']),
+.field-type input[type='url']:not(.rs__input):not([class*='rs__']),
+.field-type input[type='tel']:not(.rs__input):not([class*='rs__']),
+.field-type input[type='password']:not(.rs__input):not([class*='rs__']),
+.field-type input[type='search']:not(.rs__input):not([class*='rs__']),
+.field-type input[type='date']:not(.rs__input):not([class*='rs__']),
+.field-type__wrap > input[type='text']:not(.rs__input):not([class*='rs__']),
+.field-type__wrap > input[type='email']:not(.rs__input):not([class*='rs__']),
+.field-type__wrap > input[type='number']:not(.rs__input):not([class*='rs__']),
+.field-type__wrap > input[type='url']:not(.rs__input):not([class*='rs__']),
+.field-type__wrap > input[type='tel']:not(.rs__input):not([class*='rs__']),
+.field-type__wrap > input[type='password']:not(.rs__input):not([class*='rs__']),
+.field-type__wrap > input[type='search']:not(.rs__input):not([class*='rs__']),
+.field-type__wrap > input[type='date']:not(.rs__input):not([class*='rs__']) {
   background: #fafaf5 !important;
   border: 1px solid #e8e8e2 !important;
   border-radius: 8px !important;
@@ -505,17 +505,53 @@ label.field-type__label {
 .field-type__wrap .rs__input-container {
   background: transparent !important;
   border: 0 !important;
+  border-radius: 0 !important;
   padding: 0 !important;
   margin: 0 !important;
   box-shadow: none !important;
-  color: #FFC700 !important;
-  font-weight: 600 !important;
+  outline: none !important;
+  color: #0f0f0f !important;
+  font-weight: 700 !important;
+}
+
+.rs__value-container,
+.field-type__wrap .rs__value-container {
+  padding: 4px 10px !important;
 }
 
 .rs__single-value,
-.field-type__wrap .rs__single-value {
+.rs__placeholder,
+.field-type__wrap .rs__single-value,
+.field-type__wrap .rs__placeholder {
   color: #0f0f0f !important;
   font-weight: 700 !important;
+  margin: 0 !important;
+}
+
+/* Multi-select chips — gold pills */
+.rs__multi-value,
+.field-type__wrap .rs__multi-value {
+  background: rgba(255, 199, 0, 0.18) !important;
+  border-radius: 999px !important;
+  padding: 0 4px 0 8px !important;
+}
+
+.rs__multi-value__label,
+.field-type__wrap .rs__multi-value__label {
+  color: #0f0f0f !important;
+  font-weight: 700 !important;
+  padding: 2px 4px !important;
+}
+
+.rs__multi-value__remove,
+.field-type__wrap .rs__multi-value__remove {
+  color: #0f0f0f !important;
+  border-radius: 999px !important;
+}
+
+.rs__multi-value__remove:hover,
+.field-type__wrap .rs__multi-value__remove:hover {
+  background: rgba(255, 199, 0, 0.30) !important;
 }
 
 .rs__control--is-focused,
