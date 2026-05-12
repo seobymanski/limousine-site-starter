@@ -339,7 +339,16 @@ DIFFERENTIATION RULES (MANDATORY — this is how we rank and get cited, not rewr
     let parsed: any
     try {
       parsed = JSON.parse(raw)
-    } catch (err) {
+    } catch {
+      const start = raw.indexOf('{')
+      const end = raw.lastIndexOf('}')
+      if (start >= 0 && end > start) {
+        try {
+          parsed = JSON.parse(raw.slice(start, end + 1))
+        } catch {}
+      }
+    }
+    if (!parsed) {
       return NextResponse.json(
         {
           error: 'Claude returned invalid JSON. Try a different title or try again.',
@@ -348,6 +357,20 @@ DIFFERENTIATION RULES (MANDATORY — this is how we rank and get cited, not rewr
         { status: 500 },
       )
     }
+
+    // Brand rule: content never uses em dashes (—). Strip across every text field.
+    const stripDeep = (obj: any): any => {
+      if (obj == null) return obj
+      if (typeof obj === 'string') return obj.replace(/ — /g, ', ').replace(/—/g, ', ')
+      if (Array.isArray(obj)) return obj.map(stripDeep)
+      if (typeof obj === 'object') {
+        const out: any = {}
+        for (const k of Object.keys(obj)) out[k] = stripDeep(obj[k])
+        return out
+      }
+      return obj
+    }
+    parsed = stripDeep(parsed)
 
     // Convert markdown body to Lexical JSON server-side. Reuse the same
     // editorConfig for the structured section fields below.
