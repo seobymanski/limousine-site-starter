@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import { brand, primaryAlpha } from '../../lib/brand'
 
 export interface TrendDatum {
   /** ISO date YYYY-MM-DD; rendered as e.g. "Apr 12" on the x-axis. */
@@ -69,7 +70,7 @@ const TrendLineChart: React.FC<TrendLineChartProps> = ({
             fontSize: 12,
             color: '#fff',
           }}
-          labelStyle={{ color: '#FFC700', fontWeight: 700 }}
+          labelStyle={{ color: brand.primary, fontWeight: 700 }}
           labelFormatter={(label) => formatDateTick(String(label), dateGranularity)}
           formatter={yFormatter ? ((val: any) => yFormatter(Number(val))) as any : undefined}
         />

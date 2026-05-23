@@ -12,6 +12,7 @@ import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { sendEmail } from '@/lib/resend'
+import { brand } from '@/lib/brand'
 
 const SITE_URL = 'https://www.midtexmod.org'
 const CMS_URL = 'https://cms.midtexmod.org'
@@ -41,12 +42,12 @@ function renderWelcomeHtml(unsubscribeUrl: string): string {
           <div style="font-size:11px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:#a16207;">Welcome to Mid Tex Mod</div>
         </td></tr>
         <tr><td style="padding:8px 32px 24px;">
-          <h1 style="margin:0 0 12px;font-size:24px;line-height:1.25;font-weight:800;letter-spacing:-0.5px;color:#0f0f0f;">You're on the list.</h1>
+          <h1 style="margin:0 0 12px;font-size:24px;line-height:1.25;font-weight:800;letter-spacing:-0.5px;color:${brand.textBody};">You're on the list.</h1>
           <p style="margin:0 0 14px;font-size:15px;line-height:1.55;color:#444;">
             Thanks for subscribing. You'll get the next Mid Tex Mod newsletter the moment it's published. Expect coverage of preservation efforts, upcoming events, and mid-century modern architecture across Central Texas.
           </p>
           <p style="margin:0;font-size:15px;line-height:1.55;color:#444;">
-            In the meantime, browse the <a href="${SITE_URL}/mid-texas-modern/newsletter" style="color:#0f0f0f;">past newsletter archive</a>.
+            In the meantime, browse the <a href="${SITE_URL}/mid-texas-modern/newsletter" style="color:${brand.textBody};">past newsletter archive</a>.
           </p>
         </td></tr>
         <tr><td style="padding:18px 32px 24px;border-top:1px solid #f0f0ec;background:#fbfbf6;">

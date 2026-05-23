@@ -13,6 +13,7 @@
  */
 import React from 'react'
 import Link from 'next/link'
+import { brand } from '../lib/brand'
 
 interface CardSpec {
   label: string
@@ -122,111 +123,132 @@ const SECTIONS: SectionSpec[] = [
   },
 ]
 
+const STYLES = `
+.lm-dash {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.lm-dash-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.lm-dash-section h2 {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: ${brand.sectionLabelFg};
+  font-family: system-ui, -apple-system, sans-serif;
+}
+.lm-dash-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px;
+}
+.lm-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: ${brand.cardBodyBg};
+  border: 1px solid ${brand.cardBorder};
+  border-radius: 6px;
+  overflow: hidden;
+  transition: box-shadow 160ms ease, transform 160ms ease, border-color 160ms ease;
+}
+.lm-card:hover {
+  box-shadow: 0 8px 22px -10px ${brand.cardHoverShadow};
+  border-color: ${brand.cardHoverBorder};
+  transform: translateY(-1px);
+}
+.lm-card-stretched {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  text-indent: -9999px;
+  overflow: hidden;
+}
+.lm-card-head {
+  display: flex;
+  align-items: stretch;
+  background: ${brand.cardHeaderBg};
+}
+.lm-card-label {
+  flex: 1;
+  padding: 6px 12px 7px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: ${brand.cardHeaderFg};
+  font-family: system-ui, -apple-system, sans-serif;
+  display: flex;
+  align-items: center;
+}
+.lm-card-create {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  color: ${brand.cardHeaderFg};
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+  flex-shrink: 0;
+  border-left: 1px solid rgba(15, 15, 15, 0.18);
+  transition: background 140ms ease;
+}
+.lm-card-create:hover { background: rgba(15, 15, 15, 0.1); }
+.lm-card-desc {
+  margin: 0;
+  padding: 6px 11px 8px;
+  font-size: 10.5px;
+  line-height: 1.35;
+  color: ${brand.cardBodyFg};
+  font-family: system-ui, -apple-system, sans-serif;
+}
+`
+
 const DashboardCards: React.FC = () => {
   return (
-    <div style={{ marginBottom: 8 }}>
-      {SECTIONS.map((section) => (
-        <div key={section.title} style={{ marginBottom: 12 }}>
-          <h2
-            style={{
-              margin: '0 0 6px',
-              fontSize: 11,
-              fontWeight: 800,
-              color: '#b08400',
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              fontFamily: 'system-ui, sans-serif',
-            }}
-          >
-            {section.title}
-          </h2>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-              gap: 6,
-            }}
-          >
-            {section.cards.map((card) => (
-              <div
-                key={card.label}
-                style={{
-                  position: 'relative',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  background: '#fafaf5',
-                  border: '1px solid #e8e8e2',
-                  borderRadius: 8,
-                  transition: 'background 0.15s ease, border-color 0.15s ease',
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: '7px 11px 3px',
-                  }}
-                >
-                  <Link
-                    href={card.href}
-                    style={{
-                      flex: 1,
-                      fontSize: 11,
-                      fontWeight: 800,
-                      color: '#0f0f0f',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.10em',
-                      textDecoration: 'none',
-                      fontFamily: 'system-ui, sans-serif',
-                    }}
-                  >
+    <>
+      <style dangerouslySetInnerHTML={{ __html: STYLES }} />
+      <div className="lm-dash">
+        {SECTIONS.map((section) => (
+          <div key={section.title} className="lm-dash-section">
+            <h2>{section.title}</h2>
+            <div className="lm-dash-cards">
+              {section.cards.map((card) => (
+                <div key={card.label} className="lm-card">
+                  <Link href={card.href} className="lm-card-stretched" aria-label={card.label}>
                     {card.label}
                   </Link>
-                  {card.createHref && (
-                    <Link
-                      href={card.createHref}
-                      title={`Create new ${card.label}`}
-                      aria-label={`Create new ${card.label}`}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: 20,
-                        height: 20,
-                        color: '#0f0f0f',
-                        textDecoration: 'none',
-                        fontSize: 14,
-                        fontWeight: 700,
-                        lineHeight: 1,
-                        flexShrink: 0,
-                        borderRadius: '50%',
-                        border: '1px solid #FFC700',
-                        background: '#FFC700',
-                        marginLeft: 6,
-                      }}
-                    >
-                      +
-                    </Link>
-                  )}
+                  <div className="lm-card-head">
+                    <span className="lm-card-label">{card.label}</span>
+                    {card.createHref && (
+                      <Link
+                        href={card.createHref}
+                        className="lm-card-create"
+                        aria-label={`Create new ${card.label}`}
+                      >
+                        +
+                      </Link>
+                    )}
+                  </div>
+                  <p className="lm-card-desc">{card.description}</p>
                 </div>
-                <p
-                  style={{
-                    margin: 0,
-                    padding: '0 11px 9px',
-                    fontSize: 11,
-                    lineHeight: 1.4,
-                    color: '#636360',
-                    fontFamily: 'system-ui, sans-serif',
-                  }}
-                >
-                  {card.description}
-                </p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+    </>
   )
 }
 

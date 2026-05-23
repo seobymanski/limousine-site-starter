@@ -11,6 +11,7 @@
 
 import type { Payload } from 'payload'
 import { sendEmailsBatch, type BatchEmailItem } from './resend'
+import { brand } from './brand'
 
 const SITE_URL = 'https://www.midtexmod.org'
 const CMS_URL = 'https://cms.midtexmod.org'
@@ -49,7 +50,7 @@ function renderHtml(post: NewsletterPostLite, unsubscribeUrl: string): string {
           <p style="margin:0 0 20px;font-size:15px;line-height:1.55;color:#444;">${safeExcerpt}</p>
         </td></tr>
         <tr><td style="padding:0 32px 28px;">
-          <a href="${url}" style="display:inline-block;background:#0f0f0f;color:#FFC700;text-decoration:none;font-weight:700;font-size:14px;padding:12px 22px;border-radius:8px;letter-spacing:0.02em;">Read the full newsletter</a>
+          <a href="${url}" style="display:inline-block;background:${brand.sidebarBg};color:${brand.primary};text-decoration:none;font-weight:700;font-size:14px;padding:12px 22px;border-radius:8px;letter-spacing:0.02em;">Read the full newsletter</a>
         </td></tr>
         <tr><td style="padding:18px 32px 24px;border-top:1px solid #f0f0ec;background:#fbfbf6;">
           <p style="margin:0 0 6px;font-size:11px;color:#888;line-height:1.5;">

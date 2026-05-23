@@ -1,6 +1,7 @@
 'use client'
 import React from 'react'
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
+import { brand, primaryAlpha } from '../../lib/brand'
 
 export interface TrafficSourceDatum {
   name: string
@@ -15,7 +16,7 @@ interface Props {
 // Brand-aligned palette: yellow lead, then deepening neutrals + accents.
 // Falls back to gray for very long lists.
 const COLORS = [
-  '#FFC700',
+  brand.primary,
   '#0f0f0f',
   '#16a34a',
   '#3b82f6',
@@ -79,7 +80,7 @@ const TrafficSourcesPie: React.FC<Props> = ({ data, height = 240 }) => {
                 fontSize: 12,
                 color: '#fff',
               }}
-              labelStyle={{ color: '#FFC700', fontWeight: 700 }}
+              labelStyle={{ color: brand.primary, fontWeight: 700 }}
               formatter={(value: any, name: any) => {
                 const v = Number(value)
                 const pct = total > 0 ? ((v / total) * 100).toFixed(1) : '0'

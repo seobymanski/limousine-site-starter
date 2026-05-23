@@ -1,6 +1,7 @@
 'use client'
 import React, { useMemo, useState } from 'react'
 import { OUR_DOMAIN } from '@/lib/analytics-config'
+import { brand, primaryAlpha } from '../../lib/brand'
 
 export interface KeywordRowDFS {
   keyword: string
@@ -281,7 +282,7 @@ const GapAnalysis: React.FC<GapAnalysisProps> = ({ ourKeywords, competitors }) =
                         ? 'var(--theme-elevation-50, #f5f5f0)'
                         : 'var(--theme-elevation-50, #f5f5f0)',
                     color: isActive
-                      ? '#FFC700'
+                      ? brand.primary
                       : isEmpty
                         ? 'var(--theme-elevation-300, #c4c4bf)'
                         : 'var(--theme-elevation-700, #444)',
@@ -307,8 +308,8 @@ const GapAnalysis: React.FC<GapAnalysisProps> = ({ ourKeywords, competitors }) =
                       fontWeight: 800,
                       padding: '1px 6px',
                       borderRadius: 8,
-                      background: isActive ? 'rgba(255, 199, 0, 0.18)' : 'var(--theme-elevation-100, #eee)',
-                      color: isActive ? '#FFC700' : 'var(--theme-elevation-600, #666)',
+                      background: isActive ? `rgba(${brand.primaryRgb}, 0.18)` : 'var(--theme-elevation-100, #eee)',
+                      color: isActive ? brand.primary : 'var(--theme-elevation-600, #666)',
                     }}
                   >
                     {fmt(count)}
@@ -337,7 +338,7 @@ const GapAnalysis: React.FC<GapAnalysisProps> = ({ ourKeywords, competitors }) =
                   >
                     Coverage
                   </th>
-                  <th style={{ ...headerCellStyle, textAlign: 'center', minWidth: 100, background: 'rgba(255, 199, 0, 0.18)' }}>
+                  <th style={{ ...headerCellStyle, textAlign: 'center', minWidth: 100, background: `rgba(${brand.primaryRgb}, 0.18)` }}>
                     ★ {OUR_DOMAIN}
                   </th>
                   {displayedComps.map((c) => (
@@ -368,8 +369,8 @@ const GapAnalysis: React.FC<GapAnalysisProps> = ({ ourKeywords, competitors }) =
                       ? (row.our.position <= 3 ? 'rgba(22, 163, 74, 0.18)'
                         : row.our.position <= 10 ? 'rgba(101, 163, 13, 0.14)'
                         : row.our.position <= 30 ? 'rgba(180, 83, 9, 0.12)'
-                        : 'rgba(255, 199, 0, 0.08)')
-                      : 'rgba(255, 199, 0, 0.04)' }}>
+                        : `rgba(${brand.primaryRgb}, 0.08)`)
+                      : primaryAlpha(0.04) }}>
                       {row.our?.position ?? '—'}
                     </td>
                     {displayedComps.map((c) => {

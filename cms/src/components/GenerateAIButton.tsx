@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { useField } from '@payloadcms/ui'
 import type { UIFieldClientComponent } from 'payload'
+import { brand, primaryAlpha } from '../lib/brand'
 
 interface PostType {
   slug: string
@@ -261,7 +262,7 @@ const GenerateAIButton: UIFieldClientComponent = () => {
         padding: '1rem',
         border: '1px solid var(--theme-elevation-100, #e5e5e5)',
         borderRadius: '8px',
-        background: 'linear-gradient(135deg, rgba(255,199,0,0.04), rgba(255,199,0,0.1))',
+        background: `linear-gradient(135deg, ${primaryAlpha(0.04)}, ${primaryAlpha(0.1)})`,
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
@@ -393,7 +394,7 @@ const GenerateAIButton: UIFieldClientComponent = () => {
         disabled={isLoading || isChecking || !!regenLoading || !hint.trim() || duplicateMatches.length > 0}
         style={{
           padding: '0.6rem 1.2rem',
-          background: (isLoading || isChecking) ? '#aaa' : '#FFC700',
+          background: (isLoading || isChecking) ? '#aaa' : brand.primary,
           color: '#111',
           border: 'none',
           borderRadius: '6px',

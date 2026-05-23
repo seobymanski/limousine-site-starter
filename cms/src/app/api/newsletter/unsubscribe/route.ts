@@ -9,6 +9,7 @@
 import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
+import { brand } from '@/lib/brand'
 
 const SITE_URL = 'https://midtexmod.org'
 
@@ -21,11 +22,11 @@ function html(body: string) {
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Mid Tex Mod Newsletter</title>
   <style>
-    body { margin:0; padding:48px 20px; background:#fafaf5; font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif; color:#0f0f0f; }
-    .card { max-width:480px; margin:0 auto; background:#fff; border:1px solid #e5e5e0; border-radius:12px; padding:32px; }
+    body { margin:0; padding:48px 20px; background:${brand.surface}; font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif; color:${brand.textBody}; }
+    .card { max-width:480px; margin:0 auto; background:${brand.surfaceCard}; border:1px solid #e5e5e0; border-radius:12px; padding:32px; }
     h1 { margin:0 0 12px; font-size:22px; letter-spacing:-0.4px; }
     p { margin:0 0 12px; font-size:15px; line-height:1.55; color:#444; }
-    a { color:#0f0f0f; }
+    a { color:${brand.textBody}; }
     .tag { font-size:11px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:#a16207; margin-bottom:8px; }
   </style>
 </head>

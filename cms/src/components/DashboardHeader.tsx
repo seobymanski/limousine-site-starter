@@ -1,12 +1,12 @@
 'use client'
 import React from 'react'
 import Link from 'next/link'
+import { brand } from '../lib/brand'
 
 /**
- * Gradient header above the dashboard cards. The starter ships with
- * dark ink + gold accent, so the gradient runs from ink to a slightly
- * lifted ink and the buttons swap to a gold "New Content" CTA and a
- * subtle outline "View Live Site" link.
+ * Gradient header above the dashboard cards. Dark ink gradient with a
+ * brand-accent "New Content" CTA and a subtle outline "View Live Site"
+ * link. Colors come from lib/brand.ts.
  *
  * Update the live-site URL when configuring a new client — the
  * starter's CORS list still uses https://example.com as the
@@ -61,8 +61,8 @@ const DashboardHeader: React.FC = () => {
             display: 'inline-flex',
             alignItems: 'center',
             gap: 8,
-            background: '#FFC700',
-            color: '#111',
+            background: brand.primary,
+            color: brand.onPrimary,
             fontWeight: 800,
             fontSize: 11,
             padding: '7px 14px',

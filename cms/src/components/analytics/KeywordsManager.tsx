@@ -3,6 +3,7 @@ import React, { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { DEFAULT_LOCATION } from '@/lib/analytics-config'
+import { brand, primaryAlpha } from '../../lib/brand'
 
 interface KeywordRow {
   id: number
@@ -30,7 +31,7 @@ const inputStyle: React.CSSProperties = {
 
 const buttonStyle: React.CSSProperties = {
   padding: '9px 18px',
-  background: '#FFC700',
+  background: brand.primary,
   color: '#111',
   fontWeight: 800,
   fontSize: 12,
@@ -189,7 +190,7 @@ const KeywordsManager: React.FC<Props> = ({ initialRows }) => {
             position: 'absolute',
             inset: 0,
             background:
-              'radial-gradient(ellipse at top right, rgba(255, 199, 0, 0.18), transparent 70%)',
+              `radial-gradient(ellipse at top right, rgba(${brand.primaryRgb}, 0.18), transparent 70%)`,
             pointerEvents: 'none',
           }}
         />
@@ -322,7 +323,7 @@ const KeywordsManager: React.FC<Props> = ({ initialRows }) => {
               style={{
                 padding: '8px 14px',
                 background: analyzing ? 'var(--theme-elevation-200, #ccc)' : '#0f0f0f',
-                color: analyzing ? '#666' : '#FFC700',
+                color: analyzing ? '#666' : brand.primary,
                 border: '1px solid #0f0f0f',
                 borderRadius: 6,
                 fontSize: 11,

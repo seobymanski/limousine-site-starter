@@ -1,6 +1,7 @@
 'use client'
 import React from 'react'
 import { Area, AreaChart, ResponsiveContainer } from 'recharts'
+import { brand, primaryAlpha } from '../../lib/brand'
 
 interface SparklineChartProps {
   data: number[]
@@ -10,7 +11,7 @@ interface SparklineChartProps {
 
 const SparklineChart: React.FC<SparklineChartProps> = ({
   data,
-  color = '#FFC700',
+  color = brand.primary,
   height = 40,
 }) => {
   const chartData = data.map((value, i) => ({ i, value }))

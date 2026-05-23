@@ -1,12 +1,15 @@
 import React from 'react'
+import { brand, primaryAlpha } from '../lib/brand'
 
 /**
  * Brand-wide admin re-skin for the limousine-site-starter.
  *
+ * All brand colors are read from `lib/brand.ts` so a palette swap happens
+ * in one place — do NOT hardcode hex values here.
+ *
  * Resend/Linear-style chip aesthetic: rounded "button chip" nav rows,
- * column headers as chips, form inputs as chips, dashboard cards as
- * chips. The starter ships with a dark sidebar (#111) and a gold
- * accent (#FFC700), so we keep that identity and lean into it.
+ * column headers as chips, form inputs as chips, dashboard cards as chips.
+ * Dark sidebar with a light content area; both palettes live in brand.ts.
  *
  * Targets verified Payload v3 class names (extracted from
  * @payloadcms/next/dist/prod/styles.css and @payloadcms/ui/dist/styles.css):
@@ -24,12 +27,8 @@ import React from 'react'
  *   .pill               status / version chips
  *   .field-type         form field wrapper
  *
- * Light-mode content area, dark sidebar. The CSS variables remain
- * untouched so dark mode still picks up the gold accent.
- *
  * No body-level overrides here: those caused white-screen crashes in
- * earlier iterations by interacting with Payload's own body styles.
- * Stay scoped.
+ * earlier iterations by interacting with Payload's own body styles. Stay scoped.
  *
  * IMPORTANT for maintainers: this is a JS template literal. Never use
  * backticks inside the CSS (e.g. for an inline code sample in a comment)
@@ -37,9 +36,7 @@ import React from 'react'
  */
 const css = `
 /* Hide Payload's default dashboard tiles. The DashboardCards component
-   renders the same data with descriptions inline. The starter also has
-   the previous .dashboard__card-list polish in custom.scss; those rules
-   become inert once the parent tiles are display:none. */
+   renders the same data with descriptions inline. */
 .modular-dashboard,
 .dashboard__card-list {
   display: none !important;
@@ -62,42 +59,36 @@ body.mh-autosave-active .drawer button#action-save {
 }
 
 /* ------------------------------------------------------------------ */
-/* Primary CTAs in brand gold                                          */
+/* Primary CTAs in brand accent                                        */
 /* ------------------------------------------------------------------ */
 .btn--style-primary {
-  background: #FFC700 !important;
-  border-color: #FFC700 !important;
-  color: #111 !important;
+  background: ${brand.primary} !important;
+  border-color: ${brand.primary} !important;
+  color: ${brand.onPrimary} !important;
 }
 
 .btn--style-primary:not([disabled]):hover {
-  background: #d4a300 !important;
-  border-color: #d4a300 !important;
-  color: #111 !important;
+  background: ${brand.primaryDark} !important;
+  border-color: ${brand.primaryDark} !important;
+  color: ${brand.onPrimary} !important;
 }
 
 /* ------------------------------------------------------------------ */
-/* Sidebar — keep the dark surface, add chip-style nav items          */
+/* Sidebar — dark surface with chip-style nav items                    */
 /* ------------------------------------------------------------------ */
 .nav,
 .nav__wrap,
 .template-default__nav {
-  background: #111 !important;
-  border-right: 1px solid #1e1e1e !important;
+  background: ${brand.sidebarBg} !important;
+  border-right: 1px solid ${brand.sidebarLinkBg} !important;
 }
 
-/* Whatever lives in the dark thin strip on the left of the nav (Payload's
-   nav-toggler / open-state padding) — match the sidebar so we don't get a
-   two-tone strip. */
 .template-default__nav-toggler-wrapper,
 .template-default__nav-toggler-container {
-  background: #111 !important;
+  background: ${brand.sidebarBg} !important;
 }
 
-/* Group label ("Content", "Analytics", "Settings") in brand gold. The
-   visible text inherits color from .nav-group__toggle (Payload sets it
-   to elevation-400), so we override the toggle's color too — and force
-   the chevron stroke to gold for consistency. */
+/* Group label in brand accent. */
 .nav-group__toggle,
 .nav-group__toggle:hover,
 .nav-group__toggle:focus,
@@ -106,7 +97,7 @@ body.mh-autosave-active .drawer button#action-save {
 .nav-group__toggle .nav__label,
 .nav__label,
 .nav-group__toggle * {
-  color: #FFC700 !important;
+  color: ${brand.primary} !important;
   font-weight: 800 !important;
   font-size: 13px !important;
   letter-spacing: 0.12em !important;
@@ -115,14 +106,12 @@ body.mh-autosave-active .drawer button#action-save {
 
 .nav-group__toggle .stroke,
 .nav-group__toggle:focus-visible .stroke {
-  stroke: #FFC700 !important;
+  stroke: ${brand.primary} !important;
 }
 
-/* Each row link — chip-style button. Soft ivory text on dark elevation
-   chips; gold-bordered active state. */
 .nav__link,
 .nav__link * {
-  color: #e8e8e2 !important;
+  color: ${brand.sidebarText} !important;
 }
 
 .nav__link {
@@ -130,24 +119,23 @@ body.mh-autosave-active .drawer button#action-save {
   margin: 3px 10px !important;
   padding: 8px 12px !important;
   font-weight: 500 !important;
-  background: #1e1e1e !important;
-  border: 1px solid #2a2a2a !important;
+  background: ${brand.sidebarLinkBg} !important;
+  border: 1px solid ${brand.sidebarLinkHover} !important;
   text-decoration: none !important;
   transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease !important;
 }
 
 .nav__link:hover,
 .nav__link:hover * {
-  color: #FFC700 !important;
+  color: ${brand.primary} !important;
 }
 
 .nav__link:hover {
-  background: #2a2a2a !important;
-  border-color: #363636 !important;
+  background: ${brand.sidebarLinkHover} !important;
+  border-color: ${brand.sidebarBorder} !important;
   text-decoration: none !important;
 }
 
-/* Kill any text-decoration underline Payload paints on nav anchors */
 .nav__link,
 .nav__link:hover,
 .nav__link:focus,
@@ -157,35 +145,31 @@ body.mh-autosave-active .drawer button#action-save {
   box-shadow: none !important;
 }
 
-/* Active row — gold border + gold text so it stands out */
 .nav__link.active,
 .nav__link.active * {
-  color: #FFC700 !important;
+  color: ${brand.primary} !important;
 }
 
 .nav__link.active {
-  background: #2a2a2a !important;
-  border-color: #FFC700 !important;
+  background: ${brand.sidebarLinkHover} !important;
+  border-color: ${brand.primary} !important;
   font-weight: 600 !important;
 }
 
 .nav__link.active:hover,
 .nav__link.active:hover * {
-  color: #FFC700 !important;
+  color: ${brand.primary} !important;
 }
 
 .nav__link.active:hover {
-  background: #363636 !important;
-  border-color: #FFC700 !important;
+  background: ${brand.sidebarLinkActive} !important;
+  border-color: ${brand.primary} !important;
 }
 
-/* Hide Payload's small left-edge active-indicator bar — the gold border
-   already conveys the active state, the bar is visual noise. */
 .nav__link-indicator {
   display: none !important;
 }
 
-/* Group caret toggle — same pill treatment */
 .nav-group__toggle {
   border-radius: 8px !important;
   margin: 2px 10px !important;
@@ -193,21 +177,20 @@ body.mh-autosave-active .drawer button#action-save {
 }
 
 .nav-group__toggle:hover {
-  background: rgba(255, 199, 0, 0.08) !important;
+  background: ${primaryAlpha(0.08)} !important;
 }
 
 html[data-theme='light'] .nav-group__toggle:hover {
-  background: rgba(255, 199, 0, 0.08) !important;
+  background: ${primaryAlpha(0.08)} !important;
 }
 
-/* Log-out row */
 .nav__log-out {
   border-radius: 8px !important;
   margin: 2px 10px !important;
 }
 
 /* ------------------------------------------------------------------ */
-/* Inputs / search — soft rounded pill                                 */
+/* Inputs / search                                                     */
 /* ------------------------------------------------------------------ */
 .search-filter,
 .collection-list__search-input {
@@ -215,13 +198,10 @@ html[data-theme='light'] .nav-group__toggle:hover {
 }
 
 .search-filter:focus-within {
-  border-color: #FFC700 !important;
-  box-shadow: 0 0 0 3px rgba(255, 199, 0, 0.18) !important;
+  border-color: ${brand.primary} !important;
+  box-shadow: 0 0 0 3px ${primaryAlpha(0.18)} !important;
 }
 
-/* ------------------------------------------------------------------ */
-/* Tables — airy rows                                                  */
-/* ------------------------------------------------------------------ */
 .collection-list thead th {
   font-size: 12px !important;
   font-weight: 600 !important;
@@ -235,19 +215,11 @@ html[data-theme='light'] .nav-group__toggle:hover {
   vertical-align: middle;
 }
 
-/* ------------------------------------------------------------------ */
-/* Hide the bulk-Edit button on the list-selection toolbar. It opens a
-   drawer that OVERWRITES the chosen field across every selected row
-   with no preview of current values — too dangerous for editorial
-   content. Bulk Delete stays; per-row edits happen by clicking the
-   row's title as normal. */
 .list-selection .edit-many,
 .list-selection .edit-many__toggle {
   display: none !important;
 }
 
-/* Status pills (Published / Draft) fully rounded                      */
-/* ------------------------------------------------------------------ */
 .pill {
   border-radius: 999px !important;
   font-weight: 600 !important;
@@ -255,70 +227,56 @@ html[data-theme='light'] .nav-group__toggle:hover {
 }
 
 /* ==================================================================
-   List & edit views — port the same chip aesthetic into the main
-   content area so collection pages feel cohesive with the sidebar.
-   The content surface is light, so chips here use warm neutrals.
+   List & edit views — chip aesthetic on the light content surface.
    ================================================================== */
 
-/* Page titles — keep ink-black for legibility on light bg; the gold
-   accent shows up via active tabs, hyperlinks, and primary CTAs. */
 .list-header__title,
 .collection-edit__header h1,
 .global-edit__header h1,
 h1.label-generic-doc-title,
 .list-header h1 {
-  color: #0f0f0f !important;
+  color: ${brand.textBody} !important;
   font-weight: 800 !important;
   letter-spacing: -0.01em !important;
 }
 
-/* Tab labels: dark when active, with a gold underline so the brand
-   accent picks up the focus. */
 .tabs-field__tab-button {
-  color: #84847c !important;
+  color: ${brand.textSubtle} !important;
 }
 
 .tabs-field__tab-button.tabs-field__tab-button--active {
-  color: #0f0f0f !important;
-  border-bottom-color: #FFC700 !important;
+  color: ${brand.textBody} !important;
+  border-bottom-color: ${brand.primary} !important;
   font-weight: 700 !important;
 }
 
-/* List-view table — soft hairlines + warm hover */
 .collection-list table,
 .relationship--has-many table {
   border-collapse: separate !important;
   border-spacing: 0 !important;
 }
 
-/* Column headers as chip-style buttons matching the sidebar nav.
-   Shorter than form inputs — these are labels, not pressable. */
 .collection-list thead th,
 .relationship--has-many thead th {
-  color: #0f0f0f !important;
+  color: ${brand.textBody} !important;
   font-size: 11px !important;
   font-weight: 800 !important;
   letter-spacing: 0.10em !important;
   text-transform: uppercase !important;
-  background: #fafaf5 !important;
-  border: 1px solid #e8e8e2 !important;
+  background: ${brand.surface} !important;
+  border: 1px solid ${brand.surfaceBorder} !important;
   border-radius: 6px !important;
   padding: 2px 10px !important;
   margin: 0 4px 4px 0 !important;
   white-space: nowrap !important;
 }
 
-/* Force the table to use border-spacing so the chips become discrete
-   rectangles with predictable gaps between them. */
 .collection-list .table table,
 .collection-list table {
   border-collapse: separate !important;
   border-spacing: 12px 4px !important;
 }
 
-/* The row-select column is Payload's .cell-_select. Strip chip styling
-   so it doesn't render as a button alongside the TITLE chip — it's
-   just an inline checkbox. */
 th.cell-_select,
 td.cell-_select,
 .cell-_select {
@@ -332,16 +290,11 @@ td.cell-_select,
   border-radius: 0 !important;
 }
 
-/* And the indeterminate / select-all checkbox in the header row sits
-   higher so it visually centers with the chip-style TITLE next to it. */
 thead th.cell-_select,
 thead th.cell-_select * {
   transform: translateY(-2px);
 }
 
-/* Every plausible parent of .list-selection — Payload v3 has moved
-   this element between containers across point releases, so cover all
-   the candidates. */
 .collection-list__sub-header,
 .collection-list__header,
 .list-controls,
@@ -353,8 +306,6 @@ thead th.cell-_select * {
   row-gap: 18px !important;
 }
 
-/* Bulk-actions toolbar (1 selected — Select all — Edit — Delete) sits
-   on its own row, regardless of which parent Payload puts it into. */
 .list-selection {
   display: flex !important;
   width: 100% !important;
@@ -367,30 +318,26 @@ thead th.cell-_select * {
   justify-content: flex-start !important;
 }
 
-/* Push the table down from the sub-header (which now grows when the
-   toolbar wraps onto its own row). */
 .collection-list__tables,
 .table-wrap {
   margin-top: 16px !important;
   clear: both !important;
 }
 
-/* Sort icons in column headers — ink-black to match the chip text */
 .collection-list thead th svg,
 .collection-list thead th .stroke {
-  stroke: #0f0f0f !important;
+  stroke: ${brand.textBody} !important;
 }
 
 .collection-list thead th svg path,
 .collection-list thead th svg polyline,
 .collection-list thead th svg line {
-  stroke: #0f0f0f !important;
+  stroke: ${brand.textBody} !important;
 }
 
-/* Active-sort arrow gets the gold accent, idle arrow stays subtle */
 .collection-list thead th .sort-column__asc--active svg,
 .collection-list thead th .sort-column__desc--active svg {
-  stroke: #d4a300 !important;
+  stroke: ${brand.primaryDark} !important;
 }
 
 .collection-list thead th .sort-column__asc:not(.sort-column__asc--active) svg,
@@ -403,41 +350,36 @@ thead th.cell-_select * {
 }
 
 .collection-list tbody tr:hover {
-  background: #fbfbf6 !important;
+  background: ${brand.surfaceHover} !important;
 }
 
 .collection-list tbody td,
 .relationship--has-many tbody td {
-  border-bottom: 1px solid #eeeee8 !important;
+  border-bottom: 1px solid ${brand.surfaceBorderLight} !important;
   padding: 14px !important;
 }
 
-/* Title / first-column cell — ink-black at rest, gold on hover. */
 .collection-list tbody td:first-child a,
 .cell-title a {
-  color: #0f0f0f !important;
+  color: ${brand.textBody} !important;
   font-weight: 700 !important;
 }
 
 .collection-list tbody td:first-child a:hover,
 .cell-title a:hover {
-  color: #d4a300 !important;
+  color: ${brand.primaryDark} !important;
 }
 
-/* Field labels in pewter caps */
 .field-type__wrap > label,
 .field-label,
 label.field-type__label {
-  color: #636360 !important;
+  color: ${brand.textMuted} !important;
   font-size: 11px !important;
   font-weight: 700 !important;
   letter-spacing: 0.06em !important;
   text-transform: uppercase !important;
 }
 
-/* Short inputs — chip-style: warm-paper bg, taupe border, ink-black
-   text with a bold weight so the value reads as a pressable token.
-   Mirrors the sidebar nav chip on a light surface. */
 .field-type input[type='text']:not(.rs__input):not([class*='rs__']),
 .field-type input[type='email']:not(.rs__input):not([class*='rs__']),
 .field-type input[type='number']:not(.rs__input):not([class*='rs__']),
@@ -454,10 +396,10 @@ label.field-type__label {
 .field-type__wrap > input[type='password']:not(.rs__input):not([class*='rs__']),
 .field-type__wrap > input[type='search']:not(.rs__input):not([class*='rs__']),
 .field-type__wrap > input[type='date']:not(.rs__input):not([class*='rs__']) {
-  background: #fafaf5 !important;
-  border: 1px solid #e8e8e2 !important;
+  background: ${brand.surface} !important;
+  border: 1px solid ${brand.surfaceBorder} !important;
   border-radius: 8px !important;
-  color: #0f0f0f !important;
+  color: ${brand.textBody} !important;
   font-weight: 700 !important;
   padding: 9px 14px !important;
   transition: background 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease !important;
@@ -465,40 +407,35 @@ label.field-type__label {
 
 .field-type input:focus,
 .field-type__wrap input:focus {
-  background: #ffffff !important;
-  border-color: #FFC700 !important;
-  box-shadow: 0 0 0 3px rgba(255, 199, 0, 0.18) !important;
+  background: ${brand.surfaceCard} !important;
+  border-color: ${brand.primary} !important;
+  box-shadow: 0 0 0 3px ${primaryAlpha(0.18)} !important;
   outline: none !important;
 }
 
-/* Textareas + rich-text bodies stay neutral for readability — long text
-   in a heavy weight fatigues the eye. */
 .field-type textarea,
 .field-type__wrap textarea {
-  background: #fbfbf6 !important;
-  border: 1px solid #eeeee8 !important;
+  background: ${brand.surfaceHover} !important;
+  border: 1px solid ${brand.surfaceBorderLight} !important;
   border-radius: 8px !important;
 }
 
 .field-type textarea:focus,
 .field-type__wrap textarea:focus {
-  background: #ffffff !important;
-  border-color: #FFC700 !important;
-  box-shadow: 0 0 0 3px rgba(255, 199, 0, 0.18) !important;
+  background: ${brand.surfaceCard} !important;
+  border-color: ${brand.primary} !important;
+  box-shadow: 0 0 0 3px ${primaryAlpha(0.18)} !important;
   outline: none !important;
 }
 
-/* Select / react-select control — chip style to match short inputs */
 .rs__control,
 .field-type__wrap .rs__control {
-  background: #fafaf5 !important;
-  border-color: #e8e8e2 !important;
+  background: ${brand.surface} !important;
+  border-color: ${brand.surfaceBorder} !important;
   border-radius: 8px !important;
   min-height: 40px !important;
 }
 
-/* React-select's internal search input — reset so the value isn't
-   shoved past the visible left edge by the chip padding. */
 .rs__input,
 .rs__input-container,
 .field-type__wrap .rs__input,
@@ -510,7 +447,7 @@ label.field-type__label {
   margin: 0 !important;
   box-shadow: none !important;
   outline: none !important;
-  color: #0f0f0f !important;
+  color: ${brand.textBody} !important;
   font-weight: 700 !important;
 }
 
@@ -523,78 +460,75 @@ label.field-type__label {
 .rs__placeholder,
 .field-type__wrap .rs__single-value,
 .field-type__wrap .rs__placeholder {
-  color: #0f0f0f !important;
+  color: ${brand.textBody} !important;
   font-weight: 700 !important;
   margin: 0 !important;
 }
 
-/* Multi-select chips — gold pills */
 .rs__multi-value,
 .field-type__wrap .rs__multi-value {
-  background: rgba(255, 199, 0, 0.18) !important;
+  background: ${primaryAlpha(0.18)} !important;
   border-radius: 999px !important;
   padding: 0 4px 0 8px !important;
 }
 
 .rs__multi-value__label,
 .field-type__wrap .rs__multi-value__label {
-  color: #0f0f0f !important;
+  color: ${brand.textBody} !important;
   font-weight: 700 !important;
   padding: 2px 4px !important;
 }
 
 .rs__multi-value__remove,
 .field-type__wrap .rs__multi-value__remove {
-  color: #0f0f0f !important;
+  color: ${brand.textBody} !important;
   border-radius: 999px !important;
 }
 
 .rs__multi-value__remove:hover,
 .field-type__wrap .rs__multi-value__remove:hover {
-  background: rgba(255, 199, 0, 0.30) !important;
+  background: ${primaryAlpha(0.30)} !important;
 }
 
 .rs__control--is-focused,
 .field-type__wrap .rs__control--is-focused {
-  background: #ffffff !important;
-  border-color: #FFC700 !important;
-  box-shadow: 0 0 0 3px rgba(255, 199, 0, 0.18) !important;
+  background: ${brand.surfaceCard} !important;
+  border-color: ${brand.primary} !important;
+  box-shadow: 0 0 0 3px ${primaryAlpha(0.18)} !important;
 }
 
 .rs__option--is-focused {
-  background: #fafaf5 !important;
-  color: #0f0f0f !important;
+  background: ${brand.surface} !important;
+  color: ${brand.textBody} !important;
 }
 
 .rs__option--is-selected {
-  background: #FFC700 !important;
-  color: #111 !important;
+  background: ${brand.primary} !important;
+  color: ${brand.onPrimary} !important;
 }
 
-/* Pagination */
 .paginator__page,
 .paginator__page-button {
   border-radius: 999px !important;
-  border-color: #e8e8e2 !important;
-  background: #fbfbf6 !important;
-  color: #363636 !important;
+  border-color: ${brand.surfaceBorder} !important;
+  background: ${brand.surfaceHover} !important;
+  color: ${brand.surfaceBorderStrong} !important;
 }
 
 .paginator__page--active,
 .paginator__page-button--active {
-  background: #FFC700 !important;
-  color: #111 !important;
-  border-color: #FFC700 !important;
+  background: ${brand.primary} !important;
+  color: ${brand.onPrimary} !important;
+  border-color: ${brand.primary} !important;
 }
 
-/* "Create New" CTA in list-view sub-header gets the pill treatment */
 .collection-list__sub-header .btn,
 .list-controls .btn--style-primary {
   border-radius: 999px !important;
 }
 
 /* ------------------------------------------------------------------ */
-/* Gold hyperlinks throughout (excluding nav, buttons, thumbnails)    */
+/* Brand-accent hyperlinks throughout (excluding nav, buttons, thumbs) */
 /* ------------------------------------------------------------------ */
 main a:not(.btn):not(.nav__link):not(.nav-group__toggle):not(.thumbnail__link),
 .collection-list a:not(.btn),
@@ -605,7 +539,7 @@ main a:not(.btn):not(.nav__link):not(.nav-group__toggle):not(.thumbnail__link),
 .field-type a:not(.btn),
 .relationship--single-value a,
 .relationship-cell a {
-  color: #b08400 !important;
+  color: ${brand.primaryDeep} !important;
   text-decoration: none !important;
 }
 
@@ -618,11 +552,10 @@ main a:not(.btn):not(.nav__link):not(.nav-group__toggle):not(.thumbnail__link):h
 .field-type a:not(.btn):hover,
 .relationship--single-value a:hover,
 .relationship-cell a:hover {
-  color: #d4a300 !important;
+  color: ${brand.primaryDark} !important;
   text-decoration: underline !important;
 }
 
-/* List-view title cells: no underline at rest, underline on hover */
 .collection-list tbody td:first-child a,
 .cell-title a {
   text-decoration: none !important;
@@ -633,10 +566,6 @@ main a:not(.btn):not(.nav__link):not(.nav-group__toggle):not(.thumbnail__link):h
   text-decoration: underline !important;
 }
 
-/* Pin the bulk-actions toolbar — keep starter's original positioning
-   rule from before the re-skin (the chip-spacing rules above already
-   override most of it, but leave this for the empty list case where
-   the toolbar appears before column headers render). */
 .collection-list,
 .collection-list__wrap {
   position: relative;

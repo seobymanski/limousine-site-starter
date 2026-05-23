@@ -1,12 +1,12 @@
 'use client'
 import React from 'react'
 import Link from 'next/link'
+import { brand } from '../lib/brand'
 
 /**
- * Wordmark at the top of the admin sidebar. The starter sidebar is
- * dark ink (#111), so we use `mix-blend-mode: screen` to blend out
- * any near-black pixels in the source logo without us having to
- * regenerate the asset.
+ * Wordmark at the top of the admin sidebar. The starter sidebar is dark
+ * ink, so we use `mix-blend-mode: screen` to blend out any near-black
+ * pixels in the source logo without us having to regenerate the asset.
  *
  * Per-client: drop a new `public/brand/logo.svg` (or .png) and the
  * sidebar picks it up automatically. The placeholder ships with the
@@ -16,7 +16,7 @@ const NavLogo: React.FC = () => (
   <div
     style={{
       padding: '20px 18px 14px',
-      borderBottom: '1px solid #1e1e1e',
+      borderBottom: `1px solid ${brand.sidebarLinkBg}`,
       marginBottom: 8,
       display: 'flex',
       justifyContent: 'center',
