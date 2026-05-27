@@ -1,7 +1,8 @@
 'use client'
-import React from 'react'
-import { useField } from '@payloadcms/ui'
+import React, { useEffect, useRef, useState } from 'react'
+import { useField, useForm } from '@payloadcms/ui'
 import type { SelectFieldClientComponent } from 'payload'
+import { getMissingLabels } from './publishChecks'
 
 const SITE_URL = 'https://example.com'
 
@@ -16,7 +17,57 @@ const PublishButton: SelectFieldClientComponent = ({ path }) => {
   const { value, setValue } = useField<string>({ path: path ?? 'status' })
   const { value: slug } = useField<string>({ path: 'slug' })
   const { value: category } = useField<string>({ path: 'category' })
+  const { getData, submit } = useForm()
+  const [blockedMissing, setBlockedMissing] = useState<string[] | null>(null)
   const isDraft = value !== 'published'
+
+  // Clicking Publish Now is gated by a client-side check of required
+  // fields (see publishChecks.ts). When something's missing, surface
+  // the list inline below the button — no toast spam, no surprise.
+  // Editors can override with "Publish anyway".
+  const handlePublishClick = () => {
+    if (!isDraft) {
+      setValue('draft')
+      setBlockedMissing(null)
+      return
+    }
+    const missing = getMissingLabels(getData?.())
+    if (missing.length === 0) {
+      setBlockedMissing(null)
+      setValue('published')
+    } else {
+      setBlockedMissing(missing)
+    }
+  }
+
+  const handlePublishAnyway = () => {
+    setBlockedMissing(null)
+    setValue('published')
+  }
+
+  // While the red "missing" panel is showing, re-evaluate as the editor
+  // fills things in so the list updates without needing another click on
+  // Publish. Clears the panel entirely once everything is satisfied.
+  const getDataRef = useRef(getData)
+  getDataRef.current = getData
+  useEffect(() => {
+    if (blockedMissing === null) return
+    const tick = () => {
+      const missing = getMissingLabels(getDataRef.current?.())
+      if (missing.length === 0) {
+        setBlockedMissing(null)
+      } else {
+        setBlockedMissing((prev) =>
+          prev && prev.length === missing.length && prev.every((l, i) => l === missing[i])
+            ? prev
+            : missing,
+        )
+      }
+    }
+    tick()
+    const id = setInterval(tick, 400)
+    return () => clearInterval(id)
+  }, [blockedMissing])
 
   const basePath = categoryPaths[category ?? ''] ?? '/newsletter'
   const liveUrl = slug ? `${SITE_URL}${basePath}/${slug}` : null
@@ -74,7 +125,7 @@ const PublishButton: SelectFieldClientComponent = ({ path }) => {
 
       <button
         type="button"
-        onClick={() => setValue(isDraft ? 'published' : 'draft')}
+        onClick={handlePublishClick}
         style={{
           width: '100%',
           padding: '0.65rem 1rem',
@@ -111,11 +162,54 @@ const PublishButton: SelectFieldClientComponent = ({ path }) => {
         )}
       </button>
 
+      {blockedMissing && blockedMissing.length > 0 && (
+        <div
+          role="alert"
+          style={{
+            marginTop: 8,
+            padding: '10px 12px',
+            borderRadius: 8,
+            background: 'rgba(220,38,38,0.06)',
+            border: '1px solid rgba(220,38,38,0.25)',
+            fontSize: '0.78rem',
+            color: 'var(--theme-elevation-800, #2a2a28)',
+            lineHeight: 1.4,
+          }}
+        >
+          <div style={{ fontWeight: 700, marginBottom: 4, color: '#b91c1c' }}>
+            Can&apos;t publish yet — missing:
+          </div>
+          <ul style={{ margin: '0 0 8px 0', paddingLeft: 18 }}>
+            {blockedMissing.map((label) => (
+              <li key={label}>{label}</li>
+            ))}
+          </ul>
+          <button
+            type="button"
+            onClick={handlePublishAnyway}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              padding: 0,
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              color: '#b91c1c',
+              textDecoration: 'underline',
+              cursor: 'pointer',
+            }}
+          >
+            Publish anyway →
+          </button>
+        </div>
+      )}
+
       {previewUrl && (
-        <a
-          href={previewUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          type="button"
+          onClick={async () => {
+            try { await submit({ disableSuccessStatus: true }) } catch {}
+            window.open(previewUrl, '_blank', 'noopener,noreferrer')
+          }}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -133,6 +227,7 @@ const PublishButton: SelectFieldClientComponent = ({ path }) => {
             textDecoration: 'none',
             textTransform: 'uppercase',
             letterSpacing: '0.08em',
+            cursor: 'pointer',
             transition: 'opacity 0.2s',
           }}
         >
@@ -150,14 +245,16 @@ const PublishButton: SelectFieldClientComponent = ({ path }) => {
             <circle cx="12" cy="12" r="3" />
           </svg>
           Preview
-        </a>
+        </button>
       )}
 
       {!isDraft && liveUrl && (
-        <a
-          href={liveUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          type="button"
+          onClick={async () => {
+            try { await submit({ disableSuccessStatus: true }) } catch {}
+            window.open(liveUrl, '_blank', 'noopener,noreferrer')
+          }}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -174,6 +271,7 @@ const PublishButton: SelectFieldClientComponent = ({ path }) => {
             textDecoration: 'none',
             textTransform: 'uppercase',
             letterSpacing: '0.06em',
+            cursor: 'pointer',
             transition: 'opacity 0.2s',
           }}
         >
@@ -183,7 +281,7 @@ const PublishButton: SelectFieldClientComponent = ({ path }) => {
             <line x1="10" y1="14" x2="21" y2="3" />
           </svg>
           View Live Post
-        </a>
+        </button>
       )}
     </div>
   )

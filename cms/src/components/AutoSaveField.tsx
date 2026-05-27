@@ -1,5 +1,6 @@
 'use client'
 
+import { useForm } from '@payloadcms/ui'
 import React, { useEffect, useRef, useState } from 'react'
 
 /**
@@ -9,158 +10,229 @@ import React, { useEffect, useRef, useState } from 'react'
  *
  * States:
  *   idle    — hidden
- *   pending — three pulsing pale-gold dots, "Auto-saving"
- *   saving  — three spinning gold dots, "Saving"
+ *   pending — three pulsing dots, "Auto-saving"
+ *   saving  — three spinning dots, "Saving"
  *   saved   — green ✓ "Saved" → fades out after a few seconds
  *
- * Implementation: a delegated input/change listener on the surrounding
- * form. We deliberately avoid Payload's `useFormFields` hook because
- * it broke the Cloudflare static page-data collection step in earlier
- * sessions.
+ * Implementation: we read the live form state via Payload's `useForm()`
+ * context and compare a "meaningful" snapshot of it (empty values
+ * stripped, auto-generated array row IDs ignored) against the last
+ * known state. Only when that snapshot actually changes do we trigger
+ * a save. This is what makes "Add Gallery Image" — which inserts an
+ * empty row whose only populated field is an auto-generated `id` —
+ * not count as user activity worth saving.
+ *
+ * We poll the form state on a short interval rather than using
+ * `useFormFields`, which previously caused issues with the Cloudflare
+ * static page-data collection step.
  */
 const AUTOSAVE_DELAY_MS = 2000
-// Time to ignore mutations after we trigger a save — covers the
-// network round-trip + Payload's post-save form re-render. Keeps us
-// from looping (post-save re-render → looks like a new edit → schedule
-// another save → loop).
-const SAVE_COOLDOWN_MS = 4000
+// Brief window after a save resolves to absorb Payload's post-save
+// re-render before we start diffing again. Without this we'd see the
+// server's echo of the saved state as a "new edit" and loop.
+const POST_SAVE_SETTLE_MS = 1500
 // After the saved state appears, fade the indicator out so it doesn't
 // clutter the form while the editor keeps working.
-const SAVED_VISIBLE_MS = 4000
+const SAVED_VISIBLE_MS = 3000
+// How often to re-read form state. Cheap — just reads in-memory React
+// state. Short enough that the "Auto-saving" indicator feels
+// responsive after the user's edit.
+const POLL_MS = 200
+
+type SaveState = 'idle' | 'pending' | 'saving' | 'saved'
 
 const AutoSaveField: React.FC = () => {
-  const [savingState, setSavingState] = useState<'idle' | 'pending' | 'saving' | 'saved'>('idle')
+  const [savingState, setSavingState] = useState<SaveState>('idle')
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null)
+  const { getData, submit } = useForm()
 
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Keep the latest function refs available inside the long-lived
+  // interval without re-running the effect on every render.
+  const getDataRef = useRef(getData)
+  getDataRef.current = getData
+  const submitRef = useRef(submit)
+  submitRef.current = submit
+
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const armedRef = useRef(false)
-  // Block re-entrancy: once we kick off a save, ignore any mutations
-  // for SAVE_COOLDOWN_MS. Otherwise Payload's post-save form re-render
-  // looks like a new "change" and we loop forever, never settling on
-  // "saved".
-  const saveLockUntilRef = useRef(0)
+  // True while a submit() is in flight. Prevents firing another save
+  // on top of one that's still resolving.
+  const isSavingRef = useRef(false)
+  // Brief window after submit() resolves to let Payload's post-save
+  // re-render settle, so we don't mistake the server's echo for a new
+  // edit and immediately schedule another save.
+  const settleUntilRef = useRef(0)
+  // Snapshot of the last *saved* state — what we'd send if a save fired
+  // right now would have to differ from this.
+  const lastSnapshotRef = useRef<string>('')
+  // Snapshot from the *previous* poll. We restart the debounce only
+  // when a poll's snapshot differs from this — i.e., the user just
+  // made a fresh edit — rather than every poll where current data
+  // differs from the last saved state (which would reset the timer
+  // forever and prevent the save from ever firing).
+  const prevPolledSnapshotRef = useRef<string>('')
+
+  // Suppress Payload's generic "Something went wrong." toast that
+  // fires from its built-in form-state sync (e.g. when adding an empty
+  // gallery row, the server-side form-state handler hits an edge case
+  // with no data integrity impact). Real save errors are surfaced
+  // through this component's own indicator state, so the generic toast
+  // is just noise. Anything specific (validation, "field is required",
+  // etc.) passes through untouched.
+  useEffect(() => {
+    const isNoise = (text: string) =>
+      text.trim().toLowerCase().replace(/[.!]+$/, '') === 'something went wrong'
+
+    const hideIfNoise = (el: HTMLElement) => {
+      if (isNoise(el.textContent || '')) el.style.display = 'none'
+    }
+
+    const observer = new MutationObserver((records) => {
+      for (const r of records) {
+        for (const node of Array.from(r.addedNodes)) {
+          if (!(node instanceof HTMLElement)) continue
+          if (node.matches?.('[data-sonner-toast]')) hideIfNoise(node)
+          node
+            .querySelectorAll?.('[data-sonner-toast]')
+            .forEach((t) => hideIfNoise(t as HTMLElement))
+        }
+      }
+    })
+    observer.observe(document.body, { childList: true, subtree: true })
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     document.body.classList.add('mh-autosave-active')
 
-    const armTimer = setTimeout(() => {
-      armedRef.current = true
-    }, 1000)
-
-    const form = document.querySelector(
-      'form[method="POST"], form.collection-edit, form.global-edit, main form',
-    )
-    if (!form) {
-      return () => {
-        clearTimeout(armTimer)
-        document.body.classList.remove('mh-autosave-active')
+    const computeSnapshot = (): string => {
+      try {
+        const data = getDataRef.current?.()
+        if (!data) return ''
+        return stableStringify(stripMeaningless(data))
+      } catch {
+        return ''
       }
     }
 
-    const onChange = () => {
+    // Capture a baseline snapshot after the form has had a moment to
+    // initialize. Until armedRef flips, we ignore changes — Payload's
+    // own initial render shouldn't be confused for an edit.
+    const armTimer = setTimeout(() => {
+      const baseline = computeSnapshot()
+      lastSnapshotRef.current = baseline
+      prevPolledSnapshotRef.current = baseline
+      armedRef.current = true
+    }, 1000)
+
+    const tick = () => {
       if (!armedRef.current) return
-      if (Date.now() < saveLockUntilRef.current) return
+      if (isSavingRef.current) return
+      if (Date.now() < settleUntilRef.current) return
+
+      const snapshot = computeSnapshot()
+      if (snapshot === lastSnapshotRef.current) {
+        // No unsaved changes. Keep prev-polled in sync so the next
+        // genuine edit is detected as a fresh one.
+        prevPolledSnapshotRef.current = snapshot
+        return
+      }
+
+      // There are unsaved changes. Only restart the debounce when the
+      // user has *just* edited something — otherwise let the existing
+      // timer keep counting down so the save actually fires.
+      const isFreshEdit = snapshot !== prevPolledSnapshotRef.current
+      prevPolledSnapshotRef.current = snapshot
+      if (!isFreshEdit) return
+
       setSavingState('pending')
 
-      if (timerRef.current) clearTimeout(timerRef.current)
-      timerRef.current = setTimeout(() => {
-        const saveBtn = document.querySelector<HTMLButtonElement>(
-          'button[type="button"][id="action-save"], button[type="submit"], #action-save',
-        )
-        // Lock for 4s: 2s for the round-trip + 2s for Payload's
-        // post-save re-render to settle.
-        saveLockUntilRef.current = Date.now() + SAVE_COOLDOWN_MS
-        setSavingState('saving')
-        if (saveBtn) saveBtn.click()
-        else (form as HTMLFormElement).requestSubmit()
+      const attemptSave = async () => {
+        const finalSnapshot = computeSnapshot()
+        if (finalSnapshot === lastSnapshotRef.current) {
+          setSavingState('idle')
+          return
+        }
 
-        setTimeout(() => {
+        const tag = document.activeElement?.tagName
+        if (tag === 'INPUT' || tag === 'TEXTAREA') {
+          debounceRef.current = setTimeout(attemptSave, 1000)
+          return
+        }
+
+        lastSnapshotRef.current = finalSnapshot
+        isSavingRef.current = true
+        setSavingState('saving')
+
+        try {
+          await submitRef.current?.({ disableSuccessStatus: true })
           setSavingState('saved')
           setLastSavedAt(Date.now())
-        }, 800)
-      }, AUTOSAVE_DELAY_MS)
+        } catch {
+          setSavingState('idle')
+        }
+
+        isSavingRef.current = false
+        settleUntilRef.current = Date.now() + POST_SAVE_SETTLE_MS
+        setTimeout(() => {
+          const refreshed = computeSnapshot()
+          lastSnapshotRef.current = refreshed
+          prevPolledSnapshotRef.current = refreshed
+        }, POST_SAVE_SETTLE_MS)
+      }
+
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+      debounceRef.current = setTimeout(attemptSave, AUTOSAVE_DELAY_MS)
     }
 
-    form.addEventListener('input', onChange, true)
-    form.addEventListener('change', onChange, true)
-
-    // Mutation observer catches programmatic field changes (image
-    // uploads, relationship pickers) that don't fire native events.
-    // We ignore mutations inside our own indicator chip and during the
-    // save-cooldown window to keep us from looping on Payload's
-    // post-save re-render.
-    const mutationObserver = new MutationObserver((records) => {
-      if (Date.now() < saveLockUntilRef.current) return
-      const meaningful = records.some((r) => {
-        const t = r.target as HTMLElement
-        if (!t) return false
-        if (t.closest && (t.closest('[class*="mh-as-"]') || t.closest('.mh-autosave-indicator'))) {
-          return false
-        }
-        return true
-      })
-      if (meaningful) onChange()
-    })
-    mutationObserver.observe(form, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['value', 'src', 'data-id', 'data-value'],
-    })
+    const pollId = setInterval(tick, POLL_MS)
 
     return () => {
       clearTimeout(armTimer)
-      if (timerRef.current) clearTimeout(timerRef.current)
-      form.removeEventListener('input', onChange, true)
-      form.removeEventListener('change', onChange, true)
-      mutationObserver.disconnect()
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+      clearInterval(pollId)
       document.body.classList.remove('mh-autosave-active')
     }
   }, [])
 
-  // Tick every second while transient state changes are happening so
-  // the auto-hide animates cleanly.
-  const [, forceTick] = useState(0)
+  // After the green "Saved" highlight expires, drop back to the
+  // muted "All changes saved" placeholder.
   useEffect(() => {
-    if (savingState === 'idle') return
-    const id = setInterval(() => forceTick((t) => t + 1), 1000)
-    return () => clearInterval(id)
-  }, [savingState])
+    if (savingState !== 'saved') return
+    const id = setTimeout(() => setSavingState('idle'), SAVED_VISIBLE_MS)
+    return () => clearTimeout(id)
+  }, [savingState, lastSavedAt])
 
-  // Fade the indicator out 4s after a successful save so it doesn't
-  // clutter the form. Hidden entirely until the editor types again.
-  const visible = (() => {
-    if (savingState === 'pending' || savingState === 'saving') return true
-    if (savingState === 'saved' && lastSavedAt) {
-      return Date.now() - lastSavedAt < SAVED_VISIBLE_MS
-    }
-    return false
-  })()
-
-  let label = ''
-  let bg = '#ecf6ec'
-  let border = '#cbe3cb'
-  let fg = '#2e6b34'
+  // Idle is the resting state: a muted gray "All changes saved"
+  // placeholder so the editor can confirm at a glance that work is
+  // persisted. Other states light up briefly during activity.
+  let label = 'All changes saved'
+  let bg = '#f4f4f5'
+  let border = '#e4e4e7'
+  let fg = '#71717a'
   let icon: React.ReactNode = <Checkmark />
   if (savingState === 'pending') {
     label = 'Auto-saving'
-    bg = '#fff8db'
-    border = '#f4e08a'
-    fg = '#8a6d1a'
+    bg = '#fffbe8'
+    border = '#f3e3a8'
+    fg = '#a17c1d'
     icon = <Dots animated="pulse" />
   } else if (savingState === 'saving') {
     label = 'Saving'
-    bg = '#fff4b8'
-    border = '#FFC700'
+    bg = '#fff8dc'
+    border = '#ecdfb8'
     fg = '#8a6d1a'
     icon = <Dots animated="spin" />
   } else if (savingState === 'saved') {
     label = 'Saved'
+    bg = '#ecf6ec'
+    border = '#cbe3cb'
+    fg = '#2e6b34'
   }
 
   return (
     <div
-      className="mh-autosave-indicator"
+      className="mtm-autosave-indicator"
       style={{
         display: 'inline-flex',
         alignItems: 'center',
@@ -175,11 +247,9 @@ const AutoSaveField: React.FC = () => {
         borderRadius: 999,
         fontFamily: 'system-ui, sans-serif',
         letterSpacing: '0.02em',
-        opacity: visible ? 1 : 0,
-        pointerEvents: visible ? 'auto' : 'none',
-        transform: visible ? 'translateY(0)' : 'translateY(-4px)',
+        opacity: 1,
         transition:
-          'opacity 0.3s ease, transform 0.3s ease, background 0.18s ease, border-color 0.18s ease, color 0.18s ease',
+          'background 0.18s ease, border-color 0.18s ease, color 0.18s ease',
       }}
       aria-live="polite"
     >
@@ -187,6 +257,53 @@ const AutoSaveField: React.FC = () => {
       {label}
     </div>
   )
+}
+
+// A value is "meaningfully empty" if it carries no user-entered data.
+// Crucially, an array row whose only populated field is an
+// auto-generated `id` counts as empty — that's exactly the state
+// produced by clicking "Add Gallery Image" without picking an image.
+function isMeaningfullyEmpty(value: unknown): boolean {
+  if (value === null || value === undefined || value === '') return true
+  if (Array.isArray(value)) return value.every(isMeaningfullyEmpty)
+  if (typeof value === 'object') {
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      if (k === 'id') continue
+      if (!isMeaningfullyEmpty(v)) return false
+    }
+    return true
+  }
+  return false
+}
+
+function stripMeaningless(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.filter((v) => !isMeaningfullyEmpty(v)).map(stripMeaningless)
+  }
+  if (value && typeof value === 'object') {
+    const result: Record<string, unknown> = {}
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      if (isMeaningfullyEmpty(v)) continue
+      result[k] = stripMeaningless(v)
+    }
+    return result
+  }
+  return value
+}
+
+// JSON.stringify with key sorting so two equivalent states always
+// produce the same string regardless of property insertion order.
+function stableStringify(value: unknown): string {
+  if (value === undefined) return 'null'
+  if (Array.isArray(value)) {
+    return '[' + value.map(stableStringify).join(',') + ']'
+  }
+  if (value && typeof value === 'object') {
+    const obj = value as Record<string, unknown>
+    const keys = Object.keys(obj).sort()
+    return '{' + keys.map((k) => JSON.stringify(k) + ':' + stableStringify(obj[k])).join(',') + '}'
+  }
+  return JSON.stringify(value)
 }
 
 const Checkmark: React.FC<{ color?: string }> = ({ color = 'currentColor' }) => (
@@ -209,25 +326,25 @@ const Dots: React.FC<{ animated: 'pulse' | 'spin' }> = ({ animated }) => {
       <style
         dangerouslySetInnerHTML={{
           __html: `
-@keyframes mh-as-pulse {
+@keyframes mtm-as-pulse {
   0%, 80%, 100% { opacity: 0.3; transform: scale(0.85); }
   40% { opacity: 1; transform: scale(1.1); }
 }
-@keyframes mh-as-spin {
+@keyframes mtm-as-spin {
   0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
   30% { opacity: 1; transform: translateY(-2px); }
 }
-.mh-as-dots { display: inline-flex; gap: 3px; align-items: center; }
-.mh-as-dot { animation-duration: ${animated === 'spin' ? '0.9s' : '1.4s'}; animation-iteration-count: infinite; animation-name: ${animated === 'spin' ? 'mh-as-spin' : 'mh-as-pulse'}; }
-.mh-as-dot:nth-child(2) { animation-delay: 0.15s; }
-.mh-as-dot:nth-child(3) { animation-delay: 0.3s; }
+.mtm-as-dots { display: inline-flex; gap: 3px; align-items: center; }
+.mtm-as-dot { animation-duration: ${animated === 'spin' ? '0.9s' : '1.4s'}; animation-iteration-count: infinite; animation-name: ${animated === 'spin' ? 'mtm-as-spin' : 'mtm-as-pulse'}; }
+.mtm-as-dot:nth-child(2) { animation-delay: 0.15s; }
+.mtm-as-dot:nth-child(3) { animation-delay: 0.3s; }
 `,
         }}
       />
-      <span className="mh-as-dots">
-        <span className="mh-as-dot" style={baseDot} />
-        <span className="mh-as-dot" style={baseDot} />
-        <span className="mh-as-dot" style={baseDot} />
+      <span className="mtm-as-dots">
+        <span className="mtm-as-dot" style={baseDot} />
+        <span className="mtm-as-dot" style={baseDot} />
+        <span className="mtm-as-dot" style={baseDot} />
       </span>
     </>
   )
